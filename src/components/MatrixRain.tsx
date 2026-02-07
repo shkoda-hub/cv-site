@@ -58,7 +58,7 @@ export default function MatrixRain() {
         } else if (brightness > 0.8) {
           ctx.fillStyle = "#88ff88";
         } else {
-          ctx.fillStyle = `rgba(51, 255, 51, ${0.3 + Math.random() * 0.4})`;
+          ctx.fillStyle = `rgba(80, 250, 123, ${0.3 + Math.random() * 0.4})`;
         }
 
         ctx.fillText(char, x, y);

@@ -94,8 +94,8 @@ export default function MouseTrail() {
         const size = 12 + (1 - p.life) * 8;
 
         ctx.font = `${size}px monospace`;
-        ctx.fillStyle = `rgba(51, 255, 51, ${alpha * 0.8})`;
-        ctx.shadowColor = "#33ff33";
+        ctx.fillStyle = `rgba(80, 250, 123, ${alpha * 0.8})`;
+        ctx.shadowColor = "#50fa7b";
         ctx.shadowBlur = 10 * alpha;
         ctx.fillText(p.char, p.x, p.y);
         ctx.shadowBlur = 0;
