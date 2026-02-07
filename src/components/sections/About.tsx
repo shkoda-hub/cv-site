@@ -36,20 +36,20 @@ export default function About() {
     if (!isInView || hasStarted.current) return;
     hasStarted.current = true;
 
-    // Phase 1: Loading
+    // Phase 1: Loading (slower)
     setPhase(1);
     let progress = 0;
     const loadInterval = setInterval(() => {
-      progress += Math.random() * 20 + 10;
+      progress += Math.random() * 8 + 4;
       if (progress >= 100) {
         progress = 100;
         clearInterval(loadInterval);
-        setTimeout(() => startGreeting(), 300);
+        setTimeout(() => startGreeting(), 500);
       }
       setLoadProgress(progress);
-    }, 80);
+    }, 120);
 
-    // Phase 2: Greeting typewriter
+    // Phase 2: Greeting typewriter (slower)
     function startGreeting() {
       setPhase(2);
       let charIndex = 0;
@@ -58,18 +58,18 @@ export default function About() {
         setGreetingText(fullGreeting.slice(0, charIndex));
         if (charIndex >= fullGreeting.length) {
           clearInterval(typeInterval);
-          setTimeout(() => startDescription(), 500);
+          setTimeout(() => startDescription(), 800);
         }
-      }, 40);
+      }, 70);
     }
 
     // Phase 3: Description
     function startDescription() {
       setPhase(3);
-      setTimeout(() => startCapabilities(), 800);
+      setTimeout(() => startCapabilities(), 1200);
     }
 
-    // Phase 4: Capabilities
+    // Phase 4: Capabilities (slower)
     function startCapabilities() {
       setPhase(4);
       let idx = 0;
@@ -78,15 +78,14 @@ export default function About() {
         idx++;
         if (idx >= capabilities.length) {
           clearInterval(capInterval);
-          setTimeout(() => startStats(), 400);
+          setTimeout(() => startStats(), 600);
         }
-      }, 250);
+      }, 400);
     }
 
-    // Phase 5: Stats
+    // Phase 5: Stats (slower)
     function startStats() {
       setPhase(5);
-      let currentStat = 0;
 
       function animateStat(statIdx: number) {
         if (statIdx >= stats.length) {
@@ -97,7 +96,7 @@ export default function About() {
         setStatIndex(statIdx);
         const target = stats[statIdx].value;
         let current = 0;
-        const increment = target / 20;
+        const increment = target / 25;
 
         const statInterval = setInterval(() => {
           current += increment;
@@ -109,7 +108,7 @@ export default function About() {
               newVals[statIdx] = target;
               return newVals;
             });
-            setTimeout(() => animateStat(statIdx + 1), 200);
+            setTimeout(() => animateStat(statIdx + 1), 400);
           } else {
             setStatValues(prev => {
               const newVals = [...prev];
@@ -117,7 +116,7 @@ export default function About() {
               return newVals;
             });
           }
-        }, 50);
+        }, 60);
       }
 
       animateStat(0);
