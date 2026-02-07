@@ -196,7 +196,7 @@ function BinaryBackground() {
 
 export default function Experience() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
+  const isInView = useInView(sectionRef, { once: true, amount: 0.5 });
 
   const [phase, setPhase] = useState<"idle" | "loading" | "reading" | "complete">("idle");
   const [loadProgress, setLoadProgress] = useState(0);

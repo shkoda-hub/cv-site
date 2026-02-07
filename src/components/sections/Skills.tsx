@@ -152,7 +152,7 @@ function ScanProgress({ progress }: { progress: number }) {
 
 export default function Skills() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
+  const isInView = useInView(sectionRef, { once: true, amount: 0.5 });
 
   const [phase, setPhase] = useState<"idle" | "init" | "scanning" | "complete">("idle");
   const [initProgress, setInitProgress] = useState(0);

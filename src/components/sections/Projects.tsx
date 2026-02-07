@@ -192,7 +192,7 @@ function ProjectCard({
 
 export default function Projects() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
+  const isInView = useInView(sectionRef, { once: true, amount: 0.5 });
 
   const [phase, setPhase] = useState<"idle" | "connecting" | "querying" | "fetching" | "complete">("idle");
   const [queryProgress, setQueryProgress] = useState(0);

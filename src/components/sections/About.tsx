@@ -19,7 +19,7 @@ const stats = [
 
 export default function About() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
+  const isInView = useInView(sectionRef, { once: true, amount: 0.5 });
   const hasStarted = useRef(false);
 
   const [phase, setPhase] = useState(0);
