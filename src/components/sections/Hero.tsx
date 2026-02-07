@@ -7,6 +7,39 @@ interface HistoryItem {
   command: string;
   output: string | React.ReactNode;
   isError?: boolean;
+  isTyping?: boolean;
+}
+
+// Typing output effect
+function TypingOutput({
+  text,
+  speed = 5,
+  onComplete
+}: {
+  text: string;
+  speed?: number;
+  onComplete?: () => void;
+}) {
+  const [displayed, setDisplayed] = useState("");
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (done) return;
+
+    if (displayed.length < text.length) {
+      // Type multiple characters at once for speed
+      const charsToAdd = Math.min(3, text.length - displayed.length);
+      const timeout = setTimeout(() => {
+        setDisplayed(text.slice(0, displayed.length + charsToAdd));
+      }, speed);
+      return () => clearTimeout(timeout);
+    } else {
+      setDone(true);
+      onComplete?.();
+    }
+  }, [displayed, text, speed, done, onComplete]);
+
+  return <>{displayed}</>;
 }
 
 // ==================== INTRO ANIMATION COMPONENTS ====================
@@ -396,7 +429,8 @@ export default function Hero() {
 ║     Welcome to ArtemOS Terminal v2.0                       ║
 ║     Type 'help' for commands or scroll down to explore     ║
 ╚═══════════════════════════════════════════════════════════╝
-`
+`,
+        isTyping: true
       }]);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
@@ -422,10 +456,10 @@ export default function Hero() {
 
     if (scrollCommands[trimmedCmd]) {
       const section = scrollCommands[trimmedCmd];
-      setHistory(prev => [...prev, { command: cmd, output: `Navigating to #${section}...` }]);
+      setHistory(prev => [...prev, { command: cmd, output: `Navigating to #${section}...`, isTyping: true }]);
       setTimeout(() => {
         document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
-      }, 300);
+      }, 500);
       return;
     }
 
@@ -434,12 +468,13 @@ export default function Hero() {
       const output = typeof command.output === "function"
         ? command.output(setSpecialEffect)
         : command.output;
-      setHistory(prev => [...prev, { command: cmd, output: output || "" }]);
+      setHistory(prev => [...prev, { command: cmd, output: output || "", isTyping: true }]);
     } else {
       setHistory(prev => [...prev, {
         command: cmd,
         output: `Command not found: ${trimmedCmd}\nType 'help' for available commands.`,
         isError: true,
+        isTyping: true,
       }]);
     }
   }, []);
@@ -644,7 +679,19 @@ export default function Hero() {
                         className={`whitespace-pre-wrap mt-1 ${item.isError ? "text-red-400" : ""}`}
                         style={{ color: item.isError ? undefined : "#50fa7b" }}
                       >
-                        {item.output}
+                        {item.isTyping && typeof item.output === "string" ? (
+                          <TypingOutput
+                            text={item.output}
+                            speed={3}
+                            onComplete={() => {
+                              setHistory(prev => prev.map((h, idx) =>
+                                idx === i ? { ...h, isTyping: false } : h
+                              ));
+                            }}
+                          />
+                        ) : (
+                          item.output
+                        )}
                       </pre>
                     </div>
                   ))}
