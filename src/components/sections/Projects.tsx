@@ -316,8 +316,12 @@ export default function Projects() {
                     <span className="text-[--green-dim]">[</span>
                     <div className="flex-1 h-3 bg-[--green-dim] bg-opacity-20 overflow-hidden">
                       <motion.div
-                        className="h-full bg-[--green]"
-                        style={{ width: `${queryProgress}%`, boxShadow: "0 0 10px var(--green)" }}
+                        className="h-full"
+                        style={{
+                          width: `${queryProgress}%`,
+                          backgroundColor: "#50fa7b",
+                          boxShadow: "0 0 10px #50fa7b, 0 0 20px #50fa7b"
+                        }}
                       />
                     </div>
                     <span className="text-[--green-dim]">]</span>
