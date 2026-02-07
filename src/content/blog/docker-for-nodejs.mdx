@@ -1,0 +1,109 @@
+---
+title: "Docker для Node.js разработчика"
+description: "Как контейнеризировать Node.js приложения: от Dockerfile до docker-compose"
+date: "2024-01-10"
+tags: ["Docker", "Node.js", "DevOps"]
+---
+
+Docker стал неотъемлемой частью современной разработки. Давайте разберемся, как правильно контейнеризировать Node.js приложения.
+
+## Базовый Dockerfile
+
+Начнем с простого, но эффективного Dockerfile:
+
+```dockerfile
+# Multi-stage build
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Production image
+FROM node:20-alpine
+
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY . .
+
+USER node
+EXPOSE 3000
+
+CMD ["node", "dist/index.js"]
+```
+
+## Оптимизация образа
+
+### Используйте Alpine
+
+Alpine Linux значительно меньше стандартных образов:
+
+- `node:20` — ~1GB
+- `node:20-alpine` — ~180MB
+
+### Multi-stage builds
+
+Разделяйте сборку и production:
+
+```dockerfile
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=deps /app/node_modules ./node_modules
+CMD ["node", "dist/index.js"]
+```
+
+## Docker Compose
+
+Для локальной разработки используйте docker-compose:
+
+```yaml
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://user:pass@db:5432/mydb
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: mydb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+
+volumes:
+  postgres_data:
+```
+
+## Полезные советы
+
+1. **Не запускайте от root** — используйте `USER node`
+2. **Игнорируйте node_modules** — добавьте в `.dockerignore`
+3. **Кэшируйте слои** — копируйте `package.json` отдельно
+4. **Используйте health checks** — добавьте `/health` endpoint
+
+Docker значительно упрощает развертывание и гарантирует одинаковое окружение везде.

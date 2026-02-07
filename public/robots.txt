@@ -1,0 +1,6 @@
+# robots.txt for artemshkonda.dev
+
+User-agent: *
+Allow: /
+
+Sitemap: https://artemshkonda.dev/sitemap.xml

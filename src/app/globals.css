@@ -1,26 +1,476 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --green: #33ff33;
+  --green-dim: #20c020;
+  --green-glow: rgba(51, 255, 51, 0.4);
+  --amber: #ffb000;
+  --bg: #0a0a0a;
+  --bg-light: #111;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--green);
+  font-family: "VT323", "Courier New", monospace;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--green);
+  color: var(--bg);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--green-dim);
+}
+
+/* CRT Screen Effect */
+.crt {
+  position: relative;
+}
+
+.crt::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.crt::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 90%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* Text glow */
+.glow {
+  text-shadow:
+    0 0 5px var(--green-glow),
+    0 0 10px var(--green-glow),
+    0 0 20px var(--green-glow);
+}
+
+.glow-subtle {
+  text-shadow: 0 0 10px var(--green-glow);
+}
+
+/* Flicker animation */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.8; }
+  94% { opacity: 1; }
+  97% { opacity: 0.9; }
+}
+
+.flicker {
+  animation: flicker 4s infinite;
+}
+
+/* Cursor blink */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.1em;
+  background: var(--green);
+  animation: blink 1s infinite;
+  vertical-align: text-bottom;
+  box-shadow: 0 0 10px var(--green-glow);
+}
+
+/* Typing effect */
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+/* Scan line moving */
+@keyframes scanline {
+  0% { top: 0%; }
+  100% { top: 100%; }
+}
+
+.scanline {
+  position: fixed;
+  width: 100%;
+  height: 4px;
+  background: rgba(51, 255, 51, 0.1);
+  z-index: 1001;
+  pointer-events: none;
+  animation: scanline 8s linear infinite;
+}
+
+/* Button styles */
+.btn-retro {
+  border: 2px solid var(--green);
+  color: var(--green);
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.btn-retro:hover {
+  background: var(--green);
+  color: var(--bg);
+  box-shadow: 0 0 20px var(--green-glow);
+}
+
+/* Input styles */
+.input-retro {
+  background: transparent;
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  padding: 0.75rem;
+  width: 100%;
+  outline: none;
+}
+
+.input-retro:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 10px var(--green-glow);
+}
+
+.input-retro::placeholder {
+  color: var(--green-dim);
+}
+
+/* Progress bar */
+.progress-bar {
+  color: var(--green);
+  font-family: monospace;
+  letter-spacing: -1px;
+}
+
+/* Boot text animation */
+@keyframes bootText {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.boot-line {
+  animation: bootText 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+/* ========== GLITCH EFFECTS ========== */
+
+.glitch-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch-text {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+
+.glitch-wrapper:hover .glitch-text::before {
+  animation: glitch-1 0.3s infinite linear alternate-reverse;
+  color: #ff00ff;
+  opacity: 0.8;
+  clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+}
+
+.glitch-wrapper:hover .glitch-text::after {
+  animation: glitch-2 0.3s infinite linear alternate-reverse;
+  color: #00ffff;
+  opacity: 0.8;
+  clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+}
+
+@keyframes glitch-1 {
+  0% { transform: translateX(-2px); }
+  25% { transform: translateX(2px); }
+  50% { transform: translateX(-1px); }
+  75% { transform: translateX(1px); }
+  100% { transform: translateX(-2px); }
+}
+
+@keyframes glitch-2 {
+  0% { transform: translateX(2px); }
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(1px); }
+  75% { transform: translateX(-1px); }
+  100% { transform: translateX(2px); }
+}
+
+/* ========== CYBER BUTTONS ========== */
+
+.btn-cyber {
+  position: relative;
+  border: 2px solid var(--green);
+  color: var(--green);
+  padding: 1rem 2rem;
+  background: transparent;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.btn-cyber::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--green-glow), transparent);
+  transition: left 0.5s;
+}
+
+.btn-cyber:hover::before {
+  left: 100%;
+}
+
+.btn-cyber:hover {
+  background: var(--green);
+  color: var(--bg);
+  box-shadow:
+    0 0 20px var(--green-glow),
+    0 0 40px var(--green-glow),
+    inset 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.btn-cyber-glitch {
+  position: relative;
+}
+
+.btn-cyber:hover .btn-cyber-glitch::before,
+.btn-cyber:hover .btn-cyber-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.btn-cyber:hover .btn-cyber-glitch::before {
+  animation: glitch-btn 0.2s infinite;
+  color: #ff00ff;
+  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+  transform: translateX(-2px);
+}
+
+.btn-cyber:hover .btn-cyber-glitch::after {
+  animation: glitch-btn 0.2s infinite reverse;
+  color: #00ffff;
+  clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+  transform: translateX(2px);
+}
+
+@keyframes glitch-btn {
+  0%, 100% { opacity: 1; transform: translateX(-2px); }
+  50% { opacity: 0.8; transform: translateX(2px); }
+}
+
+/* ========== HUD ELEMENTS ========== */
+
+.hud-corner {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--green);
+  opacity: 0.6;
+}
+
+.hud-corner::before,
+.hud-corner::after {
+  content: "";
+  position: absolute;
+  background: var(--green);
+}
+
+.hud-corner--tl {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+
+.hud-corner--tr {
+  top: 0;
+  right: 0;
+  border-left: none;
+  border-bottom: none;
+}
+
+.hud-corner--bl {
+  bottom: 0;
+  left: 0;
+  border-right: none;
+  border-top: none;
+}
+
+.hud-corner--br {
+  bottom: 0;
+  right: 0;
+  border-left: none;
+  border-top: none;
+}
+
+/* ========== SCAN LINE ANIMATION ========== */
+
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--green), transparent);
+  animation: scan 3s linear infinite;
+}
+
+/* ========== SECTION REVEAL ========== */
+
+.section-reveal {
+  position: relative;
+  overflow: hidden;
+}
+
+.section-reveal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg);
+  transform: translateY(0);
+  transition: transform 0.8s ease-out;
+  z-index: 10;
+}
+
+.section-reveal.revealed::before {
+  transform: translateY(-100%);
+}
+
+/* ========== TERMINAL WINDOW ========== */
+
+.terminal-window {
+  border: 1px solid var(--green);
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.terminal-header {
+  background: rgba(51, 255, 51, 0.1);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--green);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.terminal-body {
+  padding: 16px;
+}
+
+/* ========== NEON TEXT ========== */
+
+.neon-text {
+  color: var(--green);
+  text-shadow:
+    0 0 5px var(--green),
+    0 0 10px var(--green),
+    0 0 20px var(--green),
+    0 0 40px var(--green);
+  animation: neon-pulse 2s infinite alternate;
+}
+
+@keyframes neon-pulse {
+  from {
+    text-shadow:
+      0 0 5px var(--green),
+      0 0 10px var(--green),
+      0 0 20px var(--green),
+      0 0 40px var(--green);
+  }
+  to {
+    text-shadow:
+      0 0 2px var(--green),
+      0 0 5px var(--green),
+      0 0 10px var(--green),
+      0 0 20px var(--green);
+  }
+}
+
+/* ========== DATA STREAM ========== */
+
+.data-stream {
+  font-family: monospace;
+  font-size: 10px;
+  color: var(--green-dim);
+  opacity: 0.5;
+  line-height: 1.4;
 }
