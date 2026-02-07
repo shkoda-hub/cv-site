@@ -29,7 +29,17 @@ export default function MatrixRain() {
     init();
     window.addEventListener("resize", init);
 
-    const draw = () => {
+    let lastTime = 0;
+    const speed = 50; // ms between frames (higher = slower)
+
+    const draw = (time: number) => {
+      // Throttle animation speed
+      if (time - lastTime < speed) {
+        animationId = requestAnimationFrame(draw);
+        return;
+      }
+      lastTime = time;
+
       // Fade effect
       ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -62,7 +72,7 @@ export default function MatrixRain() {
       animationId = requestAnimationFrame(draw);
     };
 
-    draw();
+    animationId = requestAnimationFrame(draw);
 
     return () => {
       cancelAnimationFrame(animationId);
