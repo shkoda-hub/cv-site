@@ -328,10 +328,21 @@ export default function Hero() {
                   <div className="w-16" />
                 </div>
 
-                <div className="p-6 space-y-4">
-                  {/* ASCII Art Name */}
+                <div className="p-4 md:p-6 space-y-4">
+                  {/* Mobile: Simple text name */}
+                  <motion.div
+                    className="md:hidden text-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <h1 className="text-3xl font-bold text-[--green] glow">ARTEM</h1>
+                    <h1 className="text-3xl font-bold text-[--green] glow">SHKONDA</h1>
+                  </motion.div>
+
+                  {/* Desktop: ASCII Art Name */}
                   <motion.pre
-                    className="text-[--green] glow text-xs sm:text-sm md:text-base overflow-x-auto"
+                    className="hidden md:block text-[--green] glow text-xs lg:text-sm overflow-x-auto"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
@@ -354,7 +365,7 @@ export default function Hero() {
 
                   {/* Profile data */}
                   <motion.div
-                    className="space-y-2 text-lg"
+                    className="space-y-2 text-sm md:text-lg"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5 }}
@@ -365,24 +376,24 @@ export default function Hero() {
                       <span className="text-[--green]">profile.txt</span>
                     </div>
 
-                    <div className="pl-4 border-l-2 border-[--green-dim] space-y-1">
+                    <div className="pl-3 md:pl-4 border-l-2 border-[--green-dim] space-y-1">
                       <div>
                         <span className="text-[--green-dim]">ROLE:</span>{" "}
                         <GlitchText text="BACKEND DEVELOPER" className="glow" />
                       </div>
                       <div>
                         <span className="text-[--green-dim]">STACK:</span>{" "}
-                        <span className="glow">NODE.JS / TYPESCRIPT / POSTGRESQL</span>
+                        <span className="glow text-xs md:text-lg">NODE.JS / TYPESCRIPT / POSTGRESQL</span>
                       </div>
                       <div>
-                        <span className="text-[--green-dim]">EXPERIENCE:</span>{" "}
+                        <span className="text-[--green-dim]">EXP:</span>{" "}
                         <span className="glow">5+ YEARS</span>
                       </div>
                       <div>
                         <span className="text-[--green-dim]">LOCATION:</span>{" "}
                         <span className="glow">KYIV, UKRAINE</span>
                       </div>
-                                          </div>
+                    </div>
                   </motion.div>
 
                   {/* Command prompt */}
@@ -405,13 +416,13 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.2 }}
-                className="flex flex-wrap gap-4 justify-center"
+                className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center items-center"
               >
-                <a href="#contact" className="btn-cyber group">
-                  <span className="btn-cyber-glitch" data-text="[ INITIATE CONTACT ]">[ INITIATE CONTACT ]</span>
+                <a href="#contact" className="btn-cyber group text-sm md:text-base">
+                  <span className="btn-cyber-glitch" data-text="[ CONTACT ]">[ CONTACT ]</span>
                 </a>
-                <a href="#projects" className="btn-cyber group">
-                  <span className="btn-cyber-glitch" data-text="[ VIEW PROJECTS ]">[ VIEW PROJECTS ]</span>
+                <a href="#projects" className="btn-cyber group text-sm md:text-base">
+                  <span className="btn-cyber-glitch" data-text="[ PROJECTS ]">[ PROJECTS ]</span>
                 </a>
               </motion.div>
 
