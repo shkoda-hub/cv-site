@@ -59,9 +59,6 @@ function AnimatedSkillBar({
     }
   }, [isInView, level, index]);
 
-  const filled = Math.floor(displayLevel / 5);
-  const empty = 20 - filled;
-
   return (
     <motion.div
       ref={ref}
@@ -80,53 +77,37 @@ function AnimatedSkillBar({
         />
       )}
 
-      <div className="flex items-center gap-2 md:gap-3 text-sm md:text-lg py-1 hover:bg-[--green] hover:bg-opacity-5 transition-colors px-2 -mx-2">
+      <div className="flex items-center gap-2 md:gap-3 py-2 hover:bg-[--green] hover:bg-opacity-5 transition-colors px-2 -mx-2">
         {/* Skill name */}
-        <span className="w-24 md:w-32 text-right text-[--green-dim] group-hover:text-[--green] transition-colors text-xs md:text-base">
+        <span className="w-20 md:w-28 text-right text-[--green-dim] group-hover:text-[--green] transition-colors text-xs md:text-sm shrink-0">
           {name}
         </span>
 
-        {/* Progress bar */}
-        <div className="flex items-center flex-1">
-          <span className="text-[--green-dim]">[</span>
-          <div className="relative flex-1 mx-1">
-            <motion.span
-              className="glow inline-block"
-              style={{ color: `var(${categoryColors[category as keyof typeof categoryColors] || '--green'})` }}
-            >
-              {"█".repeat(filled)}
-            </motion.span>
-            <span className="text-[--green-dim] opacity-30">{"░".repeat(empty)}</span>
-
-            {/* Glowing end */}
-            {filled > 0 && (
-              <motion.span
-                className="absolute top-0"
-                style={{ left: `${filled * 5}%` }}
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-              </motion.span>
-            )}
+        {/* Progress bar - CSS based */}
+        <div className="flex items-center flex-1 gap-1">
+          <span className="text-[--green-dim] text-xs md:text-sm">[</span>
+          <div className="flex-1 h-3 md:h-4 bg-[--green-dim] bg-opacity-20 relative overflow-hidden">
+            <motion.div
+              className="h-full"
+              style={{
+                backgroundColor: `var(${categoryColors[category as keyof typeof categoryColors] || '--green'})`,
+                boxShadow: `0 0 10px var(${categoryColors[category as keyof typeof categoryColors] || '--green'})`
+              }}
+              initial={{ width: 0 }}
+              animate={isInView ? { width: `${displayLevel}%` } : { width: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.05 }}
+            />
           </div>
-          <span className="text-[--green-dim]">]</span>
+          <span className="text-[--green-dim] text-xs md:text-sm">]</span>
         </div>
 
         {/* Percentage */}
         <span
-          className="w-10 md:w-14 text-right glow text-xs md:text-base"
+          className="w-10 md:w-12 text-right glow text-xs md:text-sm shrink-0"
           style={{ color: `var(${categoryColors[category as keyof typeof categoryColors] || '--green'})` }}
         >
           {displayLevel}%
         </span>
-
-        {/* Status indicator - hidden on mobile */}
-        <motion.span
-          className="w-2 h-2 rounded-full hidden md:block"
-          style={{ backgroundColor: `var(${categoryColors[category as keyof typeof categoryColors] || '--green'})` }}
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1, repeat: Infinity, delay: index * 0.1 }}
-        />
       </div>
     </motion.div>
   );
