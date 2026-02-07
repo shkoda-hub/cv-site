@@ -33,7 +33,7 @@ export default async function Image() {
             left: 20,
             right: 20,
             bottom: 20,
-            border: "2px solid #50fa7b",
+            border: "2px solid #4ade80",
             display: "flex",
           }}
         />
@@ -46,8 +46,8 @@ export default async function Image() {
             left: 20,
             width: 40,
             height: 40,
-            borderLeft: "4px solid #50fa7b",
-            borderTop: "4px solid #50fa7b",
+            borderLeft: "4px solid #4ade80",
+            borderTop: "4px solid #4ade80",
             display: "flex",
           }}
         />
@@ -58,8 +58,8 @@ export default async function Image() {
             right: 20,
             width: 40,
             height: 40,
-            borderRight: "4px solid #50fa7b",
-            borderTop: "4px solid #50fa7b",
+            borderRight: "4px solid #4ade80",
+            borderTop: "4px solid #4ade80",
             display: "flex",
           }}
         />
@@ -70,8 +70,8 @@ export default async function Image() {
             left: 20,
             width: 40,
             height: 40,
-            borderLeft: "4px solid #50fa7b",
-            borderBottom: "4px solid #50fa7b",
+            borderLeft: "4px solid #4ade80",
+            borderBottom: "4px solid #4ade80",
             display: "flex",
           }}
         />
@@ -82,8 +82,8 @@ export default async function Image() {
             right: 20,
             width: 40,
             height: 40,
-            borderRight: "4px solid #50fa7b",
-            borderBottom: "4px solid #50fa7b",
+            borderRight: "4px solid #4ade80",
+            borderBottom: "4px solid #4ade80",
             display: "flex",
           }}
         />
@@ -126,7 +126,7 @@ export default async function Image() {
               display: "flex",
             }}
           />
-          <span style={{ color: "#50fa7b", marginLeft: 16, fontSize: 16, opacity: 0.7 }}>
+          <span style={{ color: "#4ade80", marginLeft: 16, fontSize: 16, opacity: 0.7 }}>
             artem@portfolio:~
           </span>
         </div>
@@ -144,8 +144,8 @@ export default async function Image() {
             style={{
               fontSize: 72,
               fontWeight: "bold",
-              color: "#50fa7b",
-              textShadow: "0 0 20px rgba(80, 250, 123, 0.5)",
+              color: "#4ade80",
+              textShadow: "0 0 20px rgba(74, 222, 128, 0.5)",
               display: "flex",
             }}
           >
@@ -155,7 +155,7 @@ export default async function Image() {
           <div
             style={{
               fontSize: 36,
-              color: "#50fa7b",
+              color: "#4ade80",
               opacity: 0.8,
               display: "flex",
             }}
@@ -166,7 +166,7 @@ export default async function Image() {
           <div
             style={{
               fontSize: 24,
-              color: "#50fa7b",
+              color: "#4ade80",
               opacity: 0.6,
               display: "flex",
               gap: 20,
@@ -189,7 +189,7 @@ export default async function Image() {
             position: "absolute",
             bottom: 50,
             fontSize: 20,
-            color: "#50fa7b",
+            color: "#4ade80",
             opacity: 0.5,
             display: "flex",
           }}
