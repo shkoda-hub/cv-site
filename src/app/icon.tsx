@@ -18,10 +18,10 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: "#4ade80",
+          color: "#98c379",
           fontFamily: "monospace",
           fontWeight: "bold",
-          border: "2px solid #4ade80",
+          border: "2px solid #98c379",
         }}
       >
         A
