@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 
 const capabilities = [
   { icon: "⚡", text: "REST & GRAPHQL API DESIGN" },
@@ -17,173 +17,116 @@ const stats = [
   { value: 99, suffix: ".9%", label: "UPTIME" },
 ];
 
-function TypeWriter({
-  text,
-  onComplete,
-  speed = 30
-}: {
-  text: string;
-  onComplete?: () => void;
-  speed?: number;
-}) {
-  const [displayed, setDisplayed] = useState("");
-
-  useEffect(() => {
-    let index = 0;
-    const interval = setInterval(() => {
-      if (index < text.length) {
-        setDisplayed(text.slice(0, index + 1));
-        index++;
-      } else {
-        clearInterval(interval);
-        onComplete?.();
-      }
-    }, speed);
-
-    return () => clearInterval(interval);
-  }, [text, speed, onComplete]);
-
-  return <span>{displayed}<span className="animate-pulse">_</span></span>;
-}
-
-function AnimatedStat({
-  value,
-  suffix,
-  label,
-  isActive,
-  onComplete
-}: {
-  value: number;
-  suffix: string;
-  label: string;
-  isActive: boolean;
-  onComplete: () => void;
-}) {
-  const [count, setCount] = useState(0);
-  const [complete, setComplete] = useState(false);
-
-  useEffect(() => {
-    if (!isActive || complete) return;
-
-    let current = 0;
-    const duration = 1000;
-    const steps = 20;
-    const increment = value / steps;
-    const stepTime = duration / steps;
-
-    const interval = setInterval(() => {
-      current += increment;
-      if (current >= value) {
-        setCount(value);
-        setComplete(true);
-        clearInterval(interval);
-        setTimeout(onComplete, 100);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, stepTime);
-
-    return () => clearInterval(interval);
-  }, [isActive, value, complete, onComplete]);
-
-  return (
-    <motion.div
-      className={`text-center p-4 border transition-all ${
-        complete ? "border-[--green]" : isActive ? "border-[--green]" : "border-[--green-dim]"
-      }`}
-      animate={isActive && !complete ? { borderColor: ["var(--green)", "var(--green-dim)", "var(--green)"] } : {}}
-      transition={{ duration: 0.5, repeat: isActive && !complete ? Infinity : 0 }}
-    >
-      <div className="text-4xl">
-        <span className={complete ? "glow" : ""} style={{ color: complete ? "var(--green)" : "var(--green-dim)" }}>
-          {count}{suffix}
-        </span>
-      </div>
-      <div className="text-[--green-dim] text-sm mt-1">{label}</div>
-    </motion.div>
-  );
-}
-
 export default function About() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const hasStarted = useRef(false);
 
   const [phase, setPhase] = useState(0);
-  // 0: idle, 1: loading, 2: greeting, 3: description, 4: capabilities, 5: stats, 6: complete
   const [loadProgress, setLoadProgress] = useState(0);
+  const [greetingText, setGreetingText] = useState("");
   const [capIndex, setCapIndex] = useState(-1);
+  const [statValues, setStatValues] = useState([0, 0, 0]);
   const [statIndex, setStatIndex] = useState(-1);
-  const [headerStatus, setHeaderStatus] = useState("IDLE");
 
-  // Start when in view
+  const fullGreeting = "► GREETINGS, HUMAN.";
+
+  // Main animation controller
   useEffect(() => {
-    if (isInView && phase === 0) {
-      setPhase(1);
-      setHeaderStatus("LOADING");
-    }
-  }, [isInView, phase]);
+    if (!isInView || hasStarted.current) return;
+    hasStarted.current = true;
 
-  // Phase 1: Loading
-  useEffect(() => {
-    if (phase !== 1) return;
-
+    // Phase 1: Loading
+    setPhase(1);
     let progress = 0;
-    const interval = setInterval(() => {
+    const loadInterval = setInterval(() => {
       progress += Math.random() * 20 + 10;
       if (progress >= 100) {
-        setLoadProgress(100);
-        clearInterval(interval);
-        setTimeout(() => {
-          setPhase(2);
-          setHeaderStatus("READING");
-        }, 200);
-      } else {
-        setLoadProgress(progress);
+        progress = 100;
+        clearInterval(loadInterval);
+        setTimeout(() => startGreeting(), 300);
       }
+      setLoadProgress(progress);
     }, 80);
 
-    return () => clearInterval(interval);
-  }, [phase]);
+    // Phase 2: Greeting typewriter
+    function startGreeting() {
+      setPhase(2);
+      let charIndex = 0;
+      const typeInterval = setInterval(() => {
+        charIndex++;
+        setGreetingText(fullGreeting.slice(0, charIndex));
+        if (charIndex >= fullGreeting.length) {
+          clearInterval(typeInterval);
+          setTimeout(() => startDescription(), 500);
+        }
+      }, 40);
+    }
 
-  // Phase 3: After description, move to capabilities
-  useEffect(() => {
-    if (phase !== 3) return;
-    const timer = setTimeout(() => {
+    // Phase 3: Description
+    function startDescription() {
+      setPhase(3);
+      setTimeout(() => startCapabilities(), 800);
+    }
+
+    // Phase 4: Capabilities
+    function startCapabilities() {
       setPhase(4);
-      setCapIndex(0);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [phase]);
-
-  // Phase 4: Capabilities one by one
-  useEffect(() => {
-    if (phase !== 4 || capIndex < 0) return;
-
-    if (capIndex >= capabilities.length) {
-      setTimeout(() => {
-        setPhase(5);
-        setStatIndex(0);
-      }, 300);
-      return;
+      let idx = 0;
+      const capInterval = setInterval(() => {
+        setCapIndex(idx);
+        idx++;
+        if (idx >= capabilities.length) {
+          clearInterval(capInterval);
+          setTimeout(() => startStats(), 400);
+        }
+      }, 250);
     }
 
-    const timer = setTimeout(() => {
-      setCapIndex(capIndex + 1);
-    }, 300);
+    // Phase 5: Stats
+    function startStats() {
+      setPhase(5);
+      let currentStat = 0;
 
-    return () => clearTimeout(timer);
-  }, [phase, capIndex]);
+      function animateStat(statIdx: number) {
+        if (statIdx >= stats.length) {
+          setPhase(6);
+          return;
+        }
 
-  // Phase 5: Stats one by one
-  useEffect(() => {
-    if (phase !== 5) return;
-    if (statIndex >= stats.length) {
-      setTimeout(() => {
-        setPhase(6);
-        setHeaderStatus("COMPLETE");
-      }, 300);
+        setStatIndex(statIdx);
+        const target = stats[statIdx].value;
+        let current = 0;
+        const increment = target / 20;
+
+        const statInterval = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            current = target;
+            clearInterval(statInterval);
+            setStatValues(prev => {
+              const newVals = [...prev];
+              newVals[statIdx] = target;
+              return newVals;
+            });
+            setTimeout(() => animateStat(statIdx + 1), 200);
+          } else {
+            setStatValues(prev => {
+              const newVals = [...prev];
+              newVals[statIdx] = Math.floor(current);
+              return newVals;
+            });
+          }
+        }, 50);
+      }
+
+      animateStat(0);
     }
-  }, [phase, statIndex]);
+
+    return () => {
+      // Cleanup if needed
+    };
+  }, [isInView]);
 
   return (
     <section id="about" className="py-20 px-6 relative">
@@ -214,7 +157,7 @@ export default function About() {
           <div className="absolute bottom-0 right-0 w-6 h-6 border-r-2 border-b-2 border-[--green]" />
 
           {/* Scanning line */}
-          {phase < 6 && (
+          {phase > 0 && phase < 6 && (
             <motion.div
               className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[--green] to-transparent opacity-30"
               animate={{ top: ["0%", "100%"] }}
@@ -237,8 +180,10 @@ export default function About() {
               animate={phase < 6 ? { opacity: [1, 0.5, 1] } : {}}
               transition={{ duration: 1, repeat: phase < 6 ? Infinity : 0 }}
             >
-              <span className={`w-2 h-2 rounded-full ${phase === 6 ? "bg-[--green]" : "bg-[--green]"}`} />
-              <span className="text-[--green-dim]">{headerStatus}</span>
+              <span className="w-2 h-2 rounded-full bg-[--green]" />
+              <span className="text-[--green-dim]">
+                {phase === 0 ? "IDLE" : phase < 6 ? "LOADING" : "COMPLETE"}
+              </span>
             </motion.div>
           </div>
 
@@ -252,31 +197,29 @@ export default function About() {
 
             {/* Phase 1: Loading */}
             {phase === 1 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-4">
+              <div className="py-4">
                 <div className="text-[--green] glow mb-4">LOADING PROFILE DATA...</div>
                 <div className="flex items-center gap-2 font-mono">
                   <span className="text-[--green-dim]">[</span>
                   <div className="flex-1 h-4 bg-[--green-dim] bg-opacity-20 overflow-hidden">
-                    <motion.div
-                      className="h-full bg-[--green]"
+                    <div
+                      className="h-full bg-[--green] transition-all"
                       style={{ width: `${loadProgress}%`, boxShadow: "0 0 10px var(--green)" }}
                     />
                   </div>
                   <span className="text-[--green-dim]">]</span>
                   <span className="text-[--green] w-12">{Math.floor(loadProgress)}%</span>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* Phase 2+: Content */}
             {phase >= 2 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+              <div className="space-y-6">
                 {/* Greeting */}
                 <div className="text-xl glow">
-                  <TypeWriter
-                    text="► GREETINGS, HUMAN."
-                    onComplete={() => setTimeout(() => setPhase(3), 300)}
-                  />
+                  {greetingText}
+                  {phase === 2 && <span className="animate-pulse">_</span>}
                 </div>
 
                 {/* Description */}
@@ -302,28 +245,22 @@ export default function About() {
                     <div className="text-[--green-dim] text-sm">CAPABILITIES:</div>
                     <div className="grid md:grid-cols-2 gap-2">
                       {capabilities.map((cap, i) => (
-                        <motion.div
+                        <div
                           key={cap.text}
-                          initial={{ opacity: 0.3, x: -20 }}
-                          animate={{
-                            opacity: i <= capIndex ? 1 : 0.3,
-                            x: i <= capIndex ? 0 : -20
-                          }}
-                          transition={{ duration: 0.3 }}
-                          className={`flex items-center gap-3 p-2 border transition-all ${
-                            i < capIndex ? "border-[--green]" : i === capIndex ? "border-[--green]" : "border-[--green-dim]"
+                          className={`flex items-center gap-3 p-2 border transition-all duration-300 ${
+                            i <= capIndex ? "border-[--green] opacity-100" : "border-[--green-dim] opacity-30"
                           }`}
                         >
                           {i <= capIndex ? (
                             <>
                               <span className="text-xl">{cap.icon}</span>
-                              <span className={i < capIndex ? "text-[--green]" : ""}>{cap.text}</span>
-                              {i < capIndex && <span className="ml-auto text-[--green]">✓</span>}
+                              <span className="text-[--green]">{cap.text}</span>
+                              <span className="ml-auto text-[--green]">✓</span>
                             </>
                           ) : (
                             <span className="text-[--green-dim]">...</span>
                           )}
-                        </motion.div>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -333,34 +270,42 @@ export default function About() {
                 {phase >= 5 && (
                   <div className="grid grid-cols-3 gap-4 pt-6 border-t border-[--green-dim]">
                     {stats.map((stat, i) => (
-                      <AnimatedStat
+                      <div
                         key={stat.label}
-                        {...stat}
-                        isActive={i === statIndex}
-                        onComplete={() => setStatIndex(statIndex + 1)}
-                      />
+                        className={`text-center p-4 border transition-all ${
+                          i <= statIndex ? "border-[--green]" : "border-[--green-dim]"
+                        }`}
+                      >
+                        <div className="text-4xl">
+                          <span
+                            className={i <= statIndex ? "glow" : ""}
+                            style={{ color: i <= statIndex ? "var(--green)" : "var(--green-dim)" }}
+                          >
+                            {statValues[i]}{stat.suffix}
+                          </span>
+                        </div>
+                        <div className="text-[--green-dim] text-sm mt-1">{stat.label}</div>
+                      </div>
                     ))}
                   </div>
                 )}
-              </motion.div>
+              </div>
             )}
 
             {/* Footer */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: phase >= 6 ? 1 : 0.3 }}
-              className="text-xs text-[--green-dim] flex justify-between border-t border-[--green-dim] pt-4"
+            <div
+              className={`text-xs text-[--green-dim] flex justify-between border-t border-[--green-dim] pt-4 transition-opacity ${
+                phase >= 6 ? "opacity-100" : "opacity-30"
+              }`}
             >
               <span>SYS.VERSION: 2.0.24</span>
               <span>KERNEL: NODE.JS v20.x</span>
               {phase >= 6 ? (
                 <span className="text-[--green] glow">✓ PROFILE LOADED</span>
               ) : (
-                <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1, repeat: Infinity }}>
-                  █
-                </motion.span>
+                <span className="animate-pulse">█</span>
               )}
-            </motion.div>
+            </div>
           </div>
         </motion.div>
       </div>
