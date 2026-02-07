@@ -12,64 +12,6 @@ function GlitchText({ text, className = "" }: { text: string; className?: string
   );
 }
 
-// Scramble effect - text that scrambles before revealing
-function ScrambleText({
-  text,
-  delay = 0,
-  speed = 30,
-  onComplete
-}: {
-  text: string;
-  delay?: number;
-  speed?: number;
-  onComplete?: () => void;
-}) {
-  const [displayed, setDisplayed] = useState("");
-  const [isScrambling, setIsScrambling] = useState(false);
-  const chars = "!@#$%^&*()_+-=[]{}|;:,.<>?/~`アイウエオカキクケコ0123456789";
-
-  useEffect(() => {
-    const startTimeout = setTimeout(() => {
-      setIsScrambling(true);
-    }, delay);
-
-    return () => clearTimeout(startTimeout);
-  }, [delay]);
-
-  useEffect(() => {
-    if (!isScrambling) return;
-
-    let currentIndex = 0;
-    let scrambleCount = 0;
-
-    const interval = setInterval(() => {
-      if (currentIndex <= text.length) {
-        const revealed = text.slice(0, currentIndex);
-        const scrambled = Array(Math.min(3, text.length - currentIndex))
-          .fill(0)
-          .map(() => chars[Math.floor(Math.random() * chars.length)])
-          .join("");
-
-        setDisplayed(revealed + scrambled);
-
-        scrambleCount++;
-        if (scrambleCount >= 2) {
-          scrambleCount = 0;
-          currentIndex++;
-        }
-      } else {
-        clearInterval(interval);
-        setDisplayed(text);
-        onComplete?.();
-      }
-    }, speed);
-
-    return () => clearInterval(interval);
-  }, [isScrambling, text, speed, chars, onComplete]);
-
-  return <span>{displayed}</span>;
-}
-
 // Typing effect with cursor
 function TypeWriter({
   text,

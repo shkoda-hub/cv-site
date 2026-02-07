@@ -242,7 +242,7 @@ export default function Projects() {
               className="mt-8 text-center"
             >
               <a
-                href="https://github.com/artemshkonda"
+                href="https://github.com/shkoda-hub"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-cyber inline-block"
