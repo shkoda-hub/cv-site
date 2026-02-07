@@ -4,32 +4,32 @@
   <!-- Grid background -->
   <defs>
     <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
-      <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#98c379" stroke-width="0.5" opacity="0.1"/>
+      <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#50fa7b" stroke-width="0.5" opacity="0.1"/>
     </pattern>
   </defs>
   <rect width="1200" height="630" fill="url(#grid)"/>
 
   <!-- Border -->
-  <rect x="20" y="20" width="1160" height="590" fill="none" stroke="#98c379" stroke-width="2"/>
+  <rect x="20" y="20" width="1160" height="590" fill="none" stroke="#50fa7b" stroke-width="2"/>
 
   <!-- Corner decorations -->
-  <path d="M 20 60 L 20 20 L 60 20" fill="none" stroke="#98c379" stroke-width="4"/>
-  <path d="M 1140 20 L 1180 20 L 1180 60" fill="none" stroke="#98c379" stroke-width="4"/>
-  <path d="M 20 570 L 20 610 L 60 610" fill="none" stroke="#98c379" stroke-width="4"/>
-  <path d="M 1140 610 L 1180 610 L 1180 570" fill="none" stroke="#98c379" stroke-width="4"/>
+  <path d="M 20 60 L 20 20 L 60 20" fill="none" stroke="#50fa7b" stroke-width="4"/>
+  <path d="M 1140 20 L 1180 20 L 1180 60" fill="none" stroke="#50fa7b" stroke-width="4"/>
+  <path d="M 20 570 L 20 610 L 60 610" fill="none" stroke="#50fa7b" stroke-width="4"/>
+  <path d="M 1140 610 L 1180 610 L 1180 570" fill="none" stroke="#50fa7b" stroke-width="4"/>
 
   <!-- Name -->
-  <text x="600" y="250" font-family="monospace" font-size="72" font-weight="bold" fill="#98c379" text-anchor="middle">ARTEM SHKONDA</text>
+  <text x="600" y="250" font-family="monospace" font-size="72" font-weight="bold" fill="#50fa7b" text-anchor="middle">ARTEM SHKONDA</text>
 
   <!-- Title -->
-  <text x="600" y="340" font-family="monospace" font-size="36" fill="#98c379" text-anchor="middle" opacity="0.8">BACKEND DEVELOPER</text>
+  <text x="600" y="340" font-family="monospace" font-size="36" fill="#50fa7b" text-anchor="middle" opacity="0.8">BACKEND DEVELOPER</text>
 
   <!-- Tech stack -->
-  <text x="600" y="420" font-family="monospace" font-size="24" fill="#98c379" text-anchor="middle" opacity="0.6">NODE.JS • TYPESCRIPT • POSTGRESQL • NESTJS</text>
+  <text x="600" y="420" font-family="monospace" font-size="24" fill="#50fa7b" text-anchor="middle" opacity="0.6">NODE.JS • TYPESCRIPT • POSTGRESQL • NESTJS</text>
 
   <!-- Terminal prompt -->
-  <text x="600" y="520" font-family="monospace" font-size="20" fill="#98c379" text-anchor="middle" opacity="0.5">&gt; ./view_portfolio.sh</text>
+  <text x="600" y="520" font-family="monospace" font-size="20" fill="#50fa7b" text-anchor="middle" opacity="0.5">&gt; ./view_portfolio.sh</text>
 
   <!-- Scanline effect -->
-  <rect x="20" y="300" width="1160" height="2" fill="#98c379" opacity="0.1"/>
+  <rect x="20" y="300" width="1160" height="2" fill="#50fa7b" opacity="0.1"/>
 </svg>

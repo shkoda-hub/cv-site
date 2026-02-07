@@ -16,7 +16,7 @@ const skills = [
   { name: "GRAPHQL", level: 60 },
 ];
 
-const SKILL_COLOR = "#98c379";
+const SKILL_COLOR = "#50fa7b";
 
 function AnimatedSkillBar({
   name,
