@@ -199,20 +199,27 @@ export default function About() {
 
             {/* Phase 1: Loading */}
             {phase === 1 && (
-              <div className="py-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="py-4"
+              >
                 <div className="text-[--green] glow mb-4">LOADING PROFILE DATA...</div>
                 <div className="flex items-center gap-2 font-mono">
                   <span className="text-[--green-dim]">[</span>
-                  <div className="flex-1 h-4 bg-[--green-dim] bg-opacity-20 overflow-hidden">
-                    <div
-                      className="h-full bg-[--green] transition-all"
-                      style={{ width: `${loadProgress}%`, boxShadow: "0 0 10px var(--green)" }}
+                  <div className="flex-1 h-4 bg-[--green-dim] bg-opacity-20 overflow-hidden relative">
+                    <motion.div
+                      className="absolute inset-y-0 left-0 bg-[#50fa7b]"
+                      style={{
+                        width: `${loadProgress}%`,
+                        boxShadow: "0 0 10px #50fa7b, 0 0 20px #50fa7b"
+                      }}
                     />
                   </div>
                   <span className="text-[--green-dim]">]</span>
                   <span className="text-[--green] w-12">{Math.floor(loadProgress)}%</span>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Phase 2+: Content */}
