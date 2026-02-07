@@ -80,9 +80,9 @@ function AnimatedSkillBar({
         />
       )}
 
-      <div className="flex items-center gap-3 text-base md:text-lg py-1 hover:bg-[--green] hover:bg-opacity-5 transition-colors px-2 -mx-2">
+      <div className="flex items-center gap-2 md:gap-3 text-sm md:text-lg py-1 hover:bg-[--green] hover:bg-opacity-5 transition-colors px-2 -mx-2">
         {/* Skill name */}
-        <span className="w-32 text-right text-[--green-dim] group-hover:text-[--green] transition-colors">
+        <span className="w-24 md:w-32 text-right text-[--green-dim] group-hover:text-[--green] transition-colors text-xs md:text-base">
           {name}
         </span>
 
@@ -114,15 +114,15 @@ function AnimatedSkillBar({
 
         {/* Percentage */}
         <span
-          className="w-14 text-right glow"
+          className="w-10 md:w-14 text-right glow text-xs md:text-base"
           style={{ color: `var(${categoryColors[category as keyof typeof categoryColors] || '--green'})` }}
         >
           {displayLevel}%
         </span>
 
-        {/* Status indicator */}
+        {/* Status indicator - hidden on mobile */}
         <motion.span
-          className="w-2 h-2 rounded-full"
+          className="w-2 h-2 rounded-full hidden md:block"
           style={{ backgroundColor: `var(${categoryColors[category as keyof typeof categoryColors] || '--green'})` }}
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1, repeat: Infinity, delay: index * 0.1 }}
@@ -201,17 +201,17 @@ export default function Skills() {
             </motion.div>
 
             {/* Legend */}
-            <div className="flex gap-6 mb-6 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[--green]" />
+            <div className="flex flex-wrap gap-3 md:gap-6 mb-6 text-xs md:text-sm">
+              <div className="flex items-center gap-1 md:gap-2">
+                <span className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-[--green]" />
                 <span className="text-[--green-dim]">BACKEND</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[--amber]" />
+              <div className="flex items-center gap-1 md:gap-2">
+                <span className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-[--amber]" />
                 <span className="text-[--green-dim]">DATABASE</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#00ffff" }} />
+              <div className="flex items-center gap-1 md:gap-2">
+                <span className="w-2 h-2 md:w-3 md:h-3 rounded-full" style={{ backgroundColor: "#00ffff" }} />
                 <span className="text-[--green-dim]">DEVOPS</span>
               </div>
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Particle {
   x: number;
@@ -16,9 +16,22 @@ export default function MouseTrail() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const particlesRef = useRef<Particle[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
   const chars = "01アイウエオカキクケコ<>{}[];=+-*/&@#$";
 
+  // Detect mobile
   useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || "ontouchstart" in window);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return; // Disable on mobile
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -103,7 +116,7 @@ export default function MouseTrail() {
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", handleMouseMove);
     };
-  }, []);
+  }, [isMobile]);
 
   return (
     <canvas
