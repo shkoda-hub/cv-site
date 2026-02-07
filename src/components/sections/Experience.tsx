@@ -32,89 +32,144 @@ const experience = [
 
 function TimelineNode({
   exp,
-  index,
-  isInView
+  isActive,
+  isLoaded,
+  onComplete
 }: {
   exp: typeof experience[0];
-  index: number;
-  isInView: boolean;
+  isActive: boolean;
+  isLoaded: boolean;
+  onComplete: () => void;
 }) {
-  const [isHovered, setIsHovered] = useState(false);
+  const [phase, setPhase] = useState(0); // 0: hidden, 1: scanning, 2: revealed
+  const [achievementIndex, setAchievementIndex] = useState(-1);
+
+  useEffect(() => {
+    if (!isActive || phase > 0) return;
+    setPhase(1);
+
+    // Scanning phase
+    setTimeout(() => {
+      setPhase(2);
+      setAchievementIndex(0);
+    }, 600);
+  }, [isActive, phase]);
+
+  // Reveal achievements one by one
+  useEffect(() => {
+    if (phase !== 2 || achievementIndex < 0) return;
+
+    if (achievementIndex >= exp.achievements.length) {
+      setTimeout(onComplete, 200);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setAchievementIndex(achievementIndex + 1);
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [phase, achievementIndex, exp.achievements.length, onComplete]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -50 }}
-      animate={isInView ? { opacity: 1, x: 0 } : {}}
-      transition={{ delay: index * 0.2, duration: 0.5 }}
-      className="relative pl-8 pb-8 last:pb-0"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className="relative pl-8 pb-8 last:pb-0">
       {/* Timeline line */}
       <div className="absolute left-[11px] top-0 bottom-0 w-[2px] bg-[--green-dim]">
         <motion.div
           className="absolute top-0 left-0 right-0 bg-[--green]"
           initial={{ height: 0 }}
-          animate={isInView ? { height: "100%" } : {}}
-          transition={{ delay: index * 0.2 + 0.3, duration: 0.5 }}
+          animate={{ height: isLoaded ? "100%" : "0%" }}
+          transition={{ duration: 0.5 }}
+          style={{ boxShadow: "0 0 10px var(--green)" }}
         />
       </div>
 
       {/* Node */}
       <motion.div
-        className="absolute left-0 top-0 w-6 h-6 border-2 border-[--green] bg-black flex items-center justify-center"
-        animate={isHovered ? { scale: 1.2, rotate: 45 } : { scale: 1, rotate: 0 }}
-        transition={{ duration: 0.2 }}
+        className={`absolute left-0 top-0 w-6 h-6 border-2 bg-black flex items-center justify-center ${
+          isLoaded ? "border-[--green]" : isActive ? "border-[--green]" : "border-[--green-dim]"
+        }`}
+        animate={isActive && !isLoaded ? { rotate: [0, 90, 180, 270, 360] } : {}}
+        transition={{ duration: 1, repeat: isActive && !isLoaded ? Infinity : 0, ease: "linear" }}
       >
-        <motion.div
-          className="w-2 h-2 bg-[--green]"
-          animate={{ opacity: exp.status === "ACTIVE" ? [1, 0.3, 1] : 1 }}
-          transition={{ duration: 1, repeat: exp.status === "ACTIVE" ? Infinity : 0 }}
-        />
+        {isLoaded ? (
+          <span className="text-[--green] text-xs">✓</span>
+        ) : isActive ? (
+          <motion.div
+            className="w-2 h-2 bg-[--green]"
+            animate={{ opacity: [1, 0.3, 1] }}
+            transition={{ duration: 0.5, repeat: Infinity }}
+          />
+        ) : (
+          <div className="w-2 h-2 bg-[--green-dim]" />
+        )}
       </motion.div>
 
       {/* Content */}
       <motion.div
-        className="border border-[--green-dim] bg-black bg-opacity-50 p-4 hover:border-[--green] transition-all"
-        animate={isHovered ? { x: 5 } : { x: 0 }}
+        className={`border bg-black bg-opacity-50 p-4 transition-all ${
+          isLoaded ? "border-[--green]" : isActive ? "border-[--green]" : "border-[--green-dim]"
+        }`}
+        initial={{ opacity: 0.3 }}
+        animate={{ opacity: phase >= 2 ? 1 : isActive ? 0.7 : 0.3 }}
       >
+        {/* Scanning effect */}
+        {phase === 1 && (
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-b from-[--green] via-transparent to-transparent opacity-20"
+            animate={{ top: ["0%", "100%"] }}
+            transition={{ duration: 0.5 }}
+          />
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[--green-dim] text-sm font-mono">[{exp.period}]</span>
+          <span className={`text-sm font-mono ${phase >= 2 ? "text-[--green]" : "text-[--green-dim]"}`}>
+            [{exp.period}]
+          </span>
           <motion.span
             className={`text-xs px-2 py-1 border ${
-              exp.status === "ACTIVE"
+              exp.status === "ACTIVE" && phase >= 2
                 ? "border-[--green] text-[--green]"
                 : "border-[--green-dim] text-[--green-dim]"
             }`}
-            animate={exp.status === "ACTIVE" ? { opacity: [1, 0.5, 1] } : {}}
+            animate={exp.status === "ACTIVE" && isLoaded ? { opacity: [1, 0.5, 1] } : {}}
             transition={{ duration: 1, repeat: Infinity }}
           >
-            {exp.status}
+            {phase >= 2 ? exp.status : "..."}
           </motion.span>
         </div>
 
         {/* Role */}
-        <div className="text-xl glow mb-1">{exp.role}</div>
-        <div className="text-[--green] mb-2">@ {exp.company}</div>
-        <div className="text-[--green-dim] text-sm mb-3">{exp.desc}</div>
+        <div className={`text-xl mb-1 ${phase >= 2 ? "glow" : "text-[--green-dim]"}`}>
+          {phase >= 2 ? exp.role : "LOADING..."}
+        </div>
+        <div className={`mb-2 ${phase >= 2 ? "text-[--green]" : "text-[--green-dim]"}`}>
+          {phase >= 2 ? `@ ${exp.company}` : ""}
+        </div>
+        <div className="text-[--green-dim] text-sm mb-3">
+          {phase >= 2 ? exp.desc : ""}
+        </div>
 
         {/* Achievements */}
         <div className="flex flex-wrap gap-2">
           {exp.achievements.map((achievement, i) => (
             <motion.span
               key={achievement}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={isInView ? { opacity: 1, scale: 1 } : {}}
-              transition={{ delay: index * 0.2 + 0.5 + i * 0.1 }}
-              className="text-xs px-2 py-1 bg-[--green] bg-opacity-10 border border-[--green-dim] hover:border-[--green] hover:bg-opacity-20 transition-all"
+              className={`text-xs px-2 py-1 border transition-all ${
+                i < achievementIndex
+                  ? "bg-[--green] bg-opacity-10 border-[--green]"
+                  : "border-[--green-dim] opacity-30"
+              }`}
+              animate={i < achievementIndex ? { scale: [0.8, 1.1, 1] } : {}}
+              transition={{ duration: 0.2 }}
             >
-              {achievement}
+              {i < achievementIndex ? achievement : "..."}
             </motion.span>
           ))}
         </div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -143,9 +198,51 @@ export default function Experience() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
+  const [phase, setPhase] = useState<"idle" | "loading" | "reading" | "complete">("idle");
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [loadedCount, setLoadedCount] = useState(0);
+
+  // Start when in view
+  useEffect(() => {
+    if (isInView && phase === "idle") {
+      setPhase("loading");
+    }
+  }, [isInView, phase]);
+
+  // Loading phase
+  useEffect(() => {
+    if (phase !== "loading") return;
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 25 + 10;
+      if (progress >= 100) {
+        setLoadProgress(100);
+        clearInterval(interval);
+        setTimeout(() => {
+          setPhase("reading");
+          setCurrentIndex(0);
+        }, 200);
+      } else {
+        setLoadProgress(progress);
+      }
+    }, 80);
+
+    return () => clearInterval(interval);
+  }, [phase]);
+
+  const handleNodeComplete = () => {
+    setLoadedCount(loadedCount + 1);
+    if (currentIndex < experience.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      setTimeout(() => setPhase("complete"), 300);
+    }
+  };
+
   return (
     <section id="experience" className="py-20 px-6 relative">
-      {/* Binary background */}
       <BinaryBackground />
 
       <div className="max-w-4xl mx-auto relative" ref={sectionRef}>
@@ -171,47 +268,78 @@ export default function Experience() {
               </div>
               <span className="text-[--green-dim] text-sm">career_timeline.log</span>
             </div>
-            <span className="text-[--green-dim] text-sm">{experience.length} ENTRIES</span>
+            <motion.span
+              className="text-[--green-dim] text-sm"
+              animate={phase !== "complete" ? { opacity: [1, 0.5, 1] } : {}}
+              transition={{ duration: 1, repeat: phase !== "complete" ? Infinity : 0 }}
+            >
+              {phase === "complete" ? `✓ ${experience.length} ENTRIES LOADED` : `${loadedCount}/${experience.length} ENTRIES`}
+            </motion.span>
           </div>
 
           {/* Content */}
           <div className="p-6">
             {/* Command */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 1 } : {}}
-              className="mb-6"
-            >
+            <div className="mb-6">
               <div className="flex items-center gap-2 text-[--green-dim] mb-2">
                 <span>$</span>
                 <span>git log --oneline career.git</span>
               </div>
-              <div className="text-[--green] glow text-xl">
-                ► LOADING CAREER HISTORY...
-              </div>
-            </motion.div>
+
+              {/* Loading bar */}
+              {phase === "loading" && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
+                  <div className="text-[--green] glow">FETCHING CAREER HISTORY...</div>
+                  <div className="flex items-center gap-2 font-mono">
+                    <span className="text-[--green-dim]">[</span>
+                    <div className="flex-1 h-3 bg-[--green-dim] bg-opacity-20 overflow-hidden">
+                      <motion.div
+                        className="h-full bg-[--green]"
+                        style={{ width: `${loadProgress}%`, boxShadow: "0 0 10px var(--green)" }}
+                      />
+                    </div>
+                    <span className="text-[--green-dim]">]</span>
+                    <span className="text-[--green] w-12 text-sm">{Math.floor(loadProgress)}%</span>
+                  </div>
+                </motion.div>
+              )}
+
+              {phase !== "loading" && (
+                <div className="text-[--green] glow text-xl">
+                  ► {phase === "complete" ? "CAREER HISTORY LOADED" : "READING ENTRIES..."}
+                </div>
+              )}
+            </div>
 
             {/* Timeline */}
-            <div className="mt-8">
-              {experience.map((exp, index) => (
-                <TimelineNode key={exp.period} exp={exp} index={index} isInView={isInView} />
-              ))}
-            </div>
+            {phase !== "loading" && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8">
+                {experience.map((exp, index) => (
+                  <TimelineNode
+                    key={exp.period}
+                    exp={exp}
+                    isActive={index === currentIndex}
+                    isLoaded={index < loadedCount}
+                    onComplete={handleNodeComplete}
+                  />
+                ))}
+              </motion.div>
+            )}
 
             {/* Footer */}
             <motion.div
               initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 1 } : {}}
-              transition={{ delay: 1 }}
+              animate={{ opacity: phase === "complete" ? 1 : 0.3 }}
               className="mt-6 pt-4 border-t border-[--green-dim] flex justify-between text-xs text-[--green-dim]"
             >
               <span>TOTAL EXPERIENCE: 5+ YEARS</span>
-              <motion.span
-                animate={{ opacity: [1, 0, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                END OF LOG █
-              </motion.span>
+              {phase === "complete" ? (
+                <span className="text-[--green] glow">✓ END OF LOG</span>
+              ) : (
+                <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1, repeat: Infinity }}>
+                  READING █
+                </motion.span>
+              )}
             </motion.div>
           </div>
         </motion.div>

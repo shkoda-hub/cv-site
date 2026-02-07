@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 const projects = [
   {
@@ -40,122 +40,152 @@ const projects = [
 
 function ProjectCard({
   project,
-  index,
-  isInView
+  isActive,
+  isLoaded,
+  onComplete
 }: {
   project: typeof projects[0];
-  index: number;
-  isInView: boolean;
+  isActive: boolean;
+  isLoaded: boolean;
+  onComplete: () => void;
 }) {
-  const [isHovered, setIsHovered] = useState(false);
-  const [isGlitching, setIsGlitching] = useState(false);
+  const [phase, setPhase] = useState(0); // 0: hidden, 1: scanning, 2: revealed
+  const [techIndex, setTechIndex] = useState(-1);
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-    setIsGlitching(true);
-    setTimeout(() => setIsGlitching(false), 200);
-  };
+  useEffect(() => {
+    if (!isActive || phase > 0) return;
+    setPhase(1);
+
+    setTimeout(() => {
+      setPhase(2);
+      setTechIndex(0);
+    }, 500);
+  }, [isActive, phase]);
+
+  // Reveal tech stack one by one
+  useEffect(() => {
+    if (phase !== 2 || techIndex < 0) return;
+
+    if (techIndex >= project.tech.length) {
+      setTimeout(onComplete, 200);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setTechIndex(techIndex + 1);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [phase, techIndex, project.tech.length, onComplete]);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ delay: index * 0.15, duration: 0.4 }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={() => setIsHovered(false)}
-      className="relative group"
+      className="relative"
+      initial={{ opacity: 0.3, scale: 0.95 }}
+      animate={{
+        opacity: isLoaded ? 1 : isActive ? 0.8 : 0.3,
+        scale: isLoaded ? 1 : isActive ? 1 : 0.95
+      }}
     >
-      {/* Glitch effect on hover */}
-      {isGlitching && (
-        <>
-          <div className="absolute inset-0 bg-[#ff00ff] opacity-20 translate-x-1" />
-          <div className="absolute inset-0 bg-[#00ffff] opacity-20 -translate-x-1" />
-        </>
-      )}
-
-      <motion.div
-        className="border border-[--green-dim] bg-black bg-opacity-80 p-5 h-full relative overflow-hidden transition-colors"
-        animate={isHovered ? { borderColor: "var(--green)" } : {}}
+      <div
+        className={`border bg-black bg-opacity-80 p-5 h-full relative overflow-hidden transition-all ${
+          isLoaded ? "border-[--green]" : isActive ? "border-[--green]" : "border-[--green-dim]"
+        }`}
       >
-        {/* Scanning line */}
-        {isHovered && (
+        {/* Scanning effect */}
+        {phase === 1 && (
           <motion.div
-            className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[--green] to-transparent"
-            initial={{ top: 0 }}
-            animate={{ top: "100%" }}
-            transition={{ duration: 0.8, repeat: Infinity }}
+            className="absolute inset-0 bg-gradient-to-b from-[--green] via-transparent to-transparent opacity-30"
+            animate={{ top: ["-100%", "100%"] }}
+            transition={{ duration: 0.4 }}
           />
         )}
 
         {/* Corner decorations */}
-        <div className="absolute top-0 left-0 w-4 h-4 border-l border-t border-[--green] opacity-50" />
-        <div className="absolute top-0 right-0 w-4 h-4 border-r border-t border-[--green] opacity-50" />
-        <div className="absolute bottom-0 left-0 w-4 h-4 border-l border-b border-[--green] opacity-50" />
-        <div className="absolute bottom-0 right-0 w-4 h-4 border-r border-b border-[--green] opacity-50" />
+        <div className={`absolute top-0 left-0 w-4 h-4 border-l border-t ${isLoaded ? "border-[--green]" : "border-[--green-dim]"} opacity-50`} />
+        <div className={`absolute top-0 right-0 w-4 h-4 border-r border-t ${isLoaded ? "border-[--green]" : "border-[--green-dim]"} opacity-50`} />
+        <div className={`absolute bottom-0 left-0 w-4 h-4 border-l border-b ${isLoaded ? "border-[--green]" : "border-[--green-dim]"} opacity-50`} />
+        <div className={`absolute bottom-0 right-0 w-4 h-4 border-r border-b ${isLoaded ? "border-[--green]" : "border-[--green-dim]"} opacity-50`} />
 
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[--green-dim] text-sm font-mono">PROJECT_{project.id}</span>
-          <motion.span
-            className="text-xs px-2 py-0.5 border border-[--green] text-[--green]"
-            animate={{ opacity: [1, 0.5, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            {project.status}
-          </motion.span>
+          <span className={`text-sm font-mono ${phase >= 2 ? "text-[--green]" : "text-[--green-dim]"}`}>
+            PROJECT_{project.id}
+          </span>
+          {phase >= 2 ? (
+            <motion.span
+              className="text-xs px-2 py-0.5 border border-[--green] text-[--green]"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+            >
+              {project.status}
+            </motion.span>
+          ) : (
+            <span className="text-xs px-2 py-0.5 border border-[--green-dim] text-[--green-dim]">...</span>
+          )}
         </div>
 
         {/* Project name */}
-        <motion.div
-          className="text-xl glow mb-2 relative"
-          animate={isHovered ? { x: [0, 2, -2, 0] } : {}}
-          transition={{ duration: 0.2 }}
-        >
-          /{project.name}
-        </motion.div>
+        <div className={`text-xl mb-2 ${phase >= 2 ? "glow" : "text-[--green-dim]"}`}>
+          {phase >= 2 ? `/${project.name}` : "/LOADING..."}
+        </div>
 
         {/* Description */}
-        <p className="text-[--green-dim] text-sm mb-4">{project.desc}</p>
+        <p className="text-[--green-dim] text-sm mb-4">
+          {phase >= 2 ? project.desc : "..."}
+        </p>
 
         {/* Tech stack */}
-        <div className="flex flex-wrap gap-1 mb-4">
+        <div className="flex flex-wrap gap-1 mb-4 min-h-[28px]">
           {project.tech.map((tech, i) => (
             <motion.span
               key={tech}
+              className={`text-xs px-2 py-0.5 transition-all ${
+                i < techIndex
+                  ? "bg-[--green] bg-opacity-20 text-[--green] border border-[--green]"
+                  : "bg-[--green-dim] bg-opacity-10 text-[--green-dim] border border-transparent"
+              }`}
               initial={{ opacity: 0, scale: 0.8 }}
-              animate={isInView ? { opacity: 1, scale: 1 } : {}}
-              transition={{ delay: index * 0.15 + 0.3 + i * 0.05 }}
-              className="text-xs px-2 py-0.5 bg-[--green] bg-opacity-10 text-[--green-dim] group-hover:text-[--green] group-hover:bg-opacity-20 transition-all"
+              animate={{
+                opacity: i < techIndex ? 1 : 0.3,
+                scale: i < techIndex ? 1 : 0.9
+              }}
             >
-              {tech}
+              {i < techIndex ? tech : "..."}
             </motion.span>
           ))}
         </div>
 
-        {/* Metrics */}
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={isHovered ? { opacity: 1, height: "auto" } : { opacity: 0, height: 0 }}
-          className="overflow-hidden"
-        >
-          <div className="border-t border-[--green-dim] pt-3 mt-3 grid grid-cols-3 gap-2 text-center">
-            {Object.entries(project.metrics).map(([key, value]) => (
-              <div key={key}>
+        {/* Metrics - show on complete */}
+        {isLoaded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="border-t border-[--green-dim] pt-3 mt-3 grid grid-cols-3 gap-2 text-center"
+          >
+            {Object.entries(project.metrics).map(([key, value], i) => (
+              <motion.div
+                key={key}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+              >
                 <div className="text-[--green] glow text-sm">{value}</div>
                 <div className="text-[--green-dim] text-xs uppercase">{key}</div>
-              </div>
+              </motion.div>
             ))}
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
 
-        {/* View prompt */}
-        <motion.div
-          className="absolute bottom-2 right-2 text-xs text-[--green-dim]"
-          animate={isHovered ? { opacity: 1 } : { opacity: 0 }}
-        >
-          [ HOVER FOR METRICS ]
-        </motion.div>
-      </motion.div>
+        {/* Loading indicator */}
+        {isActive && !isLoaded && (
+          <div className="absolute bottom-2 right-2 text-xs text-[--green]">
+            <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ duration: 0.5, repeat: Infinity }}>
+              LOADING...
+            </motion.span>
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 }
@@ -163,6 +193,55 @@ function ProjectCard({
 export default function Projects() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+
+  const [phase, setPhase] = useState<"idle" | "connecting" | "querying" | "fetching" | "complete">("idle");
+  const [queryProgress, setQueryProgress] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [loadedCount, setLoadedCount] = useState(0);
+
+  // Start when in view
+  useEffect(() => {
+    if (isInView && phase === "idle") {
+      setPhase("connecting");
+    }
+  }, [isInView, phase]);
+
+  // Connecting phase
+  useEffect(() => {
+    if (phase !== "connecting") return;
+    setTimeout(() => setPhase("querying"), 500);
+  }, [phase]);
+
+  // Querying phase
+  useEffect(() => {
+    if (phase !== "querying") return;
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 30 + 15;
+      if (progress >= 100) {
+        setQueryProgress(100);
+        clearInterval(interval);
+        setTimeout(() => {
+          setPhase("fetching");
+          setCurrentIndex(0);
+        }, 200);
+      } else {
+        setQueryProgress(progress);
+      }
+    }, 60);
+
+    return () => clearInterval(interval);
+  }, [phase]);
+
+  const handleProjectComplete = () => {
+    setLoadedCount(loadedCount + 1);
+    if (currentIndex < projects.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      setTimeout(() => setPhase("complete"), 300);
+    }
+  };
 
   return (
     <section id="projects" className="py-20 px-6 relative">
@@ -198,76 +277,114 @@ export default function Projects() {
               </div>
               <span className="text-[--green-dim] text-sm">project_database.db</span>
             </div>
-            <div className="flex items-center gap-4 text-sm">
-              <span className="text-[--green-dim]">{projects.length} PROJECTS</span>
-              <motion.span
-                className="text-[--green]"
-                animate={{ opacity: [1, 0.5, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                ● SYNCED
-              </motion.span>
-            </div>
+            <motion.span
+              className="text-sm"
+              animate={phase !== "complete" ? { opacity: [1, 0.5, 1] } : {}}
+              transition={{ duration: 1, repeat: phase !== "complete" ? Infinity : 0 }}
+            >
+              {phase === "complete" ? (
+                <span className="text-[--green]">✓ {projects.length} ROWS FETCHED</span>
+              ) : (
+                <span className="text-[--green-dim]">{loadedCount}/{projects.length} ROWS</span>
+              )}
+            </motion.span>
           </div>
 
           {/* Content */}
           <div className="p-6">
             {/* Command */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 1 } : {}}
-              className="mb-6"
-            >
+            <div className="mb-6">
               <div className="flex items-center gap-2 text-[--green-dim] mb-2">
                 <span>$</span>
                 <span>SELECT * FROM projects WHERE status = 'PRODUCTION';</span>
               </div>
-              <div className="text-[--green] glow text-xl">
-                ► {projects.length} ROWS RETURNED
-              </div>
-            </motion.div>
 
-            {/* Project grid */}
-            <div className="grid md:grid-cols-2 gap-4">
-              {projects.map((project, index) => (
-                <ProjectCard key={project.id} project={project} index={index} isInView={isInView} />
-              ))}
+              {/* Connection phase */}
+              {phase === "connecting" && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[--green]">
+                  <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 0.5, repeat: Infinity }}>
+                    CONNECTING TO DATABASE...
+                  </motion.span>
+                </motion.div>
+              )}
+
+              {/* Query phase */}
+              {phase === "querying" && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
+                  <div className="text-[--green] glow">EXECUTING QUERY...</div>
+                  <div className="flex items-center gap-2 font-mono">
+                    <span className="text-[--green-dim]">[</span>
+                    <div className="flex-1 h-3 bg-[--green-dim] bg-opacity-20 overflow-hidden">
+                      <motion.div
+                        className="h-full bg-[--green]"
+                        style={{ width: `${queryProgress}%`, boxShadow: "0 0 10px var(--green)" }}
+                      />
+                    </div>
+                    <span className="text-[--green-dim]">]</span>
+                    <span className="text-[--green] w-12 text-sm">{Math.floor(queryProgress)}%</span>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Fetching & Complete */}
+              {(phase === "fetching" || phase === "complete") && (
+                <div className="text-[--green] glow text-xl">
+                  ► {phase === "complete" ? `${projects.length} ROWS RETURNED` : "FETCHING ROWS..."}
+                </div>
+              )}
             </div>
 
+            {/* Project grid */}
+            {(phase === "fetching" || phase === "complete") && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid md:grid-cols-2 gap-4">
+                {projects.map((project, index) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    isActive={index === currentIndex}
+                    isLoaded={index < loadedCount}
+                    onComplete={handleProjectComplete}
+                  />
+                ))}
+              </motion.div>
+            )}
+
             {/* GitHub link */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 1 } : {}}
-              transition={{ delay: 0.8 }}
-              className="mt-8 text-center"
-            >
-              <a
-                href="https://github.com/shkoda-hub"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-cyber inline-block"
+            {phase === "complete" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-8 text-center"
               >
-                <span className="btn-cyber-glitch" data-text="[ VIEW ALL ON GITHUB ]">
-                  [ VIEW ALL ON GITHUB ]
-                </span>
-              </a>
-            </motion.div>
+                <a
+                  href="https://github.com/shkoda-hub"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-cyber inline-block"
+                >
+                  <span className="btn-cyber-glitch" data-text="[ VIEW ALL ON GITHUB ]">
+                    [ VIEW ALL ON GITHUB ]
+                  </span>
+                </a>
+              </motion.div>
+            )}
 
             {/* Footer */}
             <motion.div
               initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 1 } : {}}
-              transition={{ delay: 1 }}
+              animate={{ opacity: phase === "complete" ? 1 : 0.3 }}
               className="mt-6 pt-4 border-t border-[--green-dim] flex justify-between text-xs text-[--green-dim]"
             >
               <span>QUERY TIME: 0.003s</span>
-              <span>CACHE: HIT</span>
-              <motion.span
-                animate={{ opacity: [1, 0, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                █
-              </motion.span>
+              <span>CACHE: {phase === "complete" ? "HIT" : "MISS"}</span>
+              {phase === "complete" ? (
+                <span className="text-[--green] glow">✓ QUERY COMPLETE</span>
+              ) : (
+                <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1, repeat: Infinity }}>
+                  █
+                </motion.span>
+              )}
             </motion.div>
           </div>
         </motion.div>

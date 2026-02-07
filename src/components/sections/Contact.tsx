@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 
 const socialLinks = [
@@ -34,9 +34,171 @@ const socialLinks = [
   },
 ];
 
+function ChannelCard({
+  link,
+  isActive,
+  isOnline,
+  onComplete
+}: {
+  link: typeof socialLinks[0];
+  isActive: boolean;
+  isOnline: boolean;
+  onComplete: () => void;
+}) {
+  const [phase, setPhase] = useState(0); // 0: offline, 1: pinging, 2: online
+
+  useEffect(() => {
+    if (!isActive || phase > 0) return;
+    setPhase(1);
+
+    // Pinging animation
+    setTimeout(() => {
+      setPhase(2);
+      setTimeout(onComplete, 200);
+    }, 600);
+  }, [isActive, phase, onComplete]);
+
+  return (
+    <motion.div
+      className="relative"
+      initial={{ opacity: 0.3 }}
+      animate={{ opacity: isOnline ? 1 : isActive ? 0.7 : 0.3 }}
+    >
+      <a
+        href={isOnline ? link.href : undefined}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`block border p-4 transition-all relative overflow-hidden ${
+          isOnline
+            ? "border-[--green] hover:bg-[--green] hover:bg-opacity-5 cursor-pointer"
+            : isActive
+            ? "border-[--green] cursor-wait"
+            : "border-[--green-dim] cursor-not-allowed"
+        }`}
+      >
+        {/* Ping effect */}
+        {phase === 1 && (
+          <motion.div
+            className="absolute inset-0 bg-[--green] opacity-20"
+            animate={{ opacity: [0.3, 0, 0.3, 0] }}
+            transition={{ duration: 0.5 }}
+          />
+        )}
+
+        {/* Scanning line */}
+        {phase === 1 && (
+          <motion.div
+            className="absolute left-0 right-0 h-1 bg-[--green]"
+            initial={{ top: 0 }}
+            animate={{ top: "100%" }}
+            transition={{ duration: 0.4 }}
+          />
+        )}
+
+        {/* Command line style */}
+        <div className={`text-xs mb-2 font-mono ${isOnline ? "text-[--green]" : "text-[--green-dim]"}`}>
+          $ {isOnline ? link.cmd : "ping"} {isOnline ? link.value.toLowerCase() : "..."}
+        </div>
+
+        <div className="flex items-center gap-4">
+          <span className={`text-3xl transition-transform ${isOnline ? "scale-100" : "scale-75 opacity-50"}`}>
+            {isOnline ? link.icon : "⏳"}
+          </span>
+          <div className="flex-1">
+            <div className="text-[--green-dim] text-xs">{link.name}</div>
+            <div className={`transition-all ${isOnline ? "text-[--green] glow" : "text-[--green-dim]"}`}>
+              {isOnline ? link.value : "CONNECTING..."}
+            </div>
+          </div>
+          {isOnline && (
+            <motion.div
+              className="text-[--green] text-2xl"
+              animate={{ x: [0, 5, 0] }}
+              transition={{ duration: 1, repeat: Infinity }}
+            >
+              →
+            </motion.div>
+          )}
+        </div>
+
+        {/* Status */}
+        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[--green-dim] border-opacity-30">
+          {isOnline ? (
+            <>
+              <motion.span
+                className="w-2 h-2 bg-[--green] rounded-full"
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              />
+              <span className="text-[--green] text-xs">CHANNEL ACTIVE</span>
+            </>
+          ) : isActive ? (
+            <>
+              <motion.span
+                className="w-2 h-2 bg-yellow-500 rounded-full"
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 0.3, repeat: Infinity }}
+              />
+              <span className="text-yellow-500 text-xs">PINGING...</span>
+            </>
+          ) : (
+            <>
+              <span className="w-2 h-2 bg-[--green-dim] rounded-full" />
+              <span className="text-[--green-dim] text-xs">WAITING...</span>
+            </>
+          )}
+        </div>
+      </a>
+    </motion.div>
+  );
+}
+
 export default function Contact() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+
+  const [phase, setPhase] = useState<"idle" | "init" | "pinging" | "complete">("idle");
+  const [initProgress, setInitProgress] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [onlineCount, setOnlineCount] = useState(0);
+
+  // Start when in view
+  useEffect(() => {
+    if (isInView && phase === "idle") {
+      setPhase("init");
+    }
+  }, [isInView, phase]);
+
+  // Init phase
+  useEffect(() => {
+    if (phase !== "init") return;
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 25 + 15;
+      if (progress >= 100) {
+        setInitProgress(100);
+        clearInterval(interval);
+        setTimeout(() => {
+          setPhase("pinging");
+          setCurrentIndex(0);
+        }, 200);
+      } else {
+        setInitProgress(progress);
+      }
+    }, 60);
+
+    return () => clearInterval(interval);
+  }, [phase]);
+
+  const handleChannelComplete = () => {
+    setOnlineCount(onlineCount + 1);
+    if (currentIndex < socialLinks.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      setTimeout(() => setPhase("complete"), 300);
+    }
+  };
 
   return (
     <section id="contact" className="py-20 px-6 relative">
@@ -65,106 +227,81 @@ export default function Contact() {
             </div>
             <motion.div
               className="flex items-center gap-2"
-              animate={{ opacity: [1, 0.5, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
+              animate={phase !== "complete" ? { opacity: [1, 0.5, 1] } : {}}
+              transition={{ duration: 1, repeat: phase !== "complete" ? Infinity : 0 }}
             >
-              <span className="w-2 h-2 bg-[--green] rounded-full" />
-              <span className="text-[--green-dim] text-sm">ONLINE</span>
+              <span className={`w-2 h-2 rounded-full ${phase === "complete" ? "bg-[--green]" : "bg-yellow-500"}`} />
+              <span className="text-[--green-dim] text-sm">
+                {phase === "complete" ? "ALL ONLINE" : `${onlineCount}/${socialLinks.length} ONLINE`}
+              </span>
             </motion.div>
           </div>
 
           {/* Content */}
           <div className="p-6">
             {/* Command */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 1 } : {}}
-              className="mb-8"
-            >
+            <div className="mb-8">
               <div className="flex items-center gap-2 text-[--green-dim] mb-2">
                 <span>$</span>
-                <span>./list_contact_channels.sh</span>
+                <span>./list_contact_channels.sh --ping-all</span>
               </div>
-              <div className="text-[--green] glow text-xl">
-                ► {socialLinks.length} CHANNELS AVAILABLE
-              </div>
-            </motion.div>
 
-            {/* Contact links grid */}
-            <div className="grid md:grid-cols-2 gap-4">
-              {socialLinks.map((link, i) => (
-                <motion.a
-                  key={link.name}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ delay: 0.2 + i * 0.1 }}
-                  whileHover={{ scale: 1.02, x: 5 }}
-                  className="group border border-[--green-dim] hover:border-[--green] p-4 transition-all relative overflow-hidden"
-                >
-                  {/* Hover scan effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-[--green] to-transparent opacity-0 group-hover:opacity-10"
-                    initial={{ x: "-100%" }}
-                    whileHover={{ x: "100%" }}
-                    transition={{ duration: 0.5 }}
-                  />
-
-                  {/* Command line style */}
-                  <div className="text-[--green-dim] text-xs mb-2 font-mono">
-                    $ {link.cmd} {link.value.toLowerCase()}
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <span className="text-3xl group-hover:scale-110 transition-transform">
-                      {link.icon}
-                    </span>
-                    <div className="flex-1">
-                      <div className="text-[--green-dim] text-xs">{link.name}</div>
-                      <div className="text-[--green] glow group-hover:tracking-wider transition-all">
-                        {link.value}
-                      </div>
+              {/* Init phase */}
+              {phase === "init" && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
+                  <div className="text-[--green] glow">INITIALIZING NETWORK SCAN...</div>
+                  <div className="flex items-center gap-2 font-mono">
+                    <span className="text-[--green-dim]">[</span>
+                    <div className="flex-1 h-3 bg-[--green-dim] bg-opacity-20 overflow-hidden">
+                      <motion.div
+                        className="h-full bg-[--green]"
+                        style={{ width: `${initProgress}%`, boxShadow: "0 0 10px var(--green)" }}
+                      />
                     </div>
-                    <motion.div
-                      className="text-[--green] text-2xl"
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                    >
-                      →
-                    </motion.div>
+                    <span className="text-[--green-dim]">]</span>
+                    <span className="text-[--green] w-12 text-sm">{Math.floor(initProgress)}%</span>
                   </div>
+                </motion.div>
+              )}
 
-                  {/* Status */}
-                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[--green-dim] border-opacity-30">
-                    <motion.span
-                      className="w-2 h-2 bg-[--green] rounded-full"
-                      animate={{ opacity: [1, 0.3, 1] }}
-                      transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-                    />
-                    <span className="text-[--green-dim] text-xs">CHANNEL ACTIVE</span>
-                  </div>
-                </motion.a>
-              ))}
+              {/* Pinging & Complete */}
+              {(phase === "pinging" || phase === "complete") && (
+                <div className="text-[--green] glow text-xl">
+                  ► {phase === "complete" ? `${socialLinks.length} CHANNELS ONLINE` : "PINGING CHANNELS..."}
+                </div>
+              )}
             </div>
 
-            
+            {/* Contact links grid */}
+            {(phase === "pinging" || phase === "complete") && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid md:grid-cols-2 gap-4">
+                {socialLinks.map((link, i) => (
+                  <ChannelCard
+                    key={link.name}
+                    link={link}
+                    isActive={i === currentIndex}
+                    isOnline={i < onlineCount}
+                    onComplete={handleChannelComplete}
+                  />
+                ))}
+              </motion.div>
+            )}
+
             {/* Footer */}
             <motion.div
               initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 1 } : {}}
-              transition={{ delay: 0.8 }}
+              animate={{ opacity: phase === "complete" ? 1 : 0.3 }}
               className="mt-6 pt-4 border-t border-[--green-dim] flex justify-between text-xs text-[--green-dim]"
             >
               <span>LOCATION: KYIV, UA</span>
               <span>TIMEZONE: EET (UTC+2)</span>
-              <motion.span
-                animate={{ opacity: [1, 0, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                █
-              </motion.span>
+              {phase === "complete" ? (
+                <span className="text-[--green] glow">✓ ALL SYSTEMS ONLINE</span>
+              ) : (
+                <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1, repeat: Infinity }}>
+                  SCANNING █
+                </motion.span>
+              )}
             </motion.div>
           </div>
         </motion.div>
