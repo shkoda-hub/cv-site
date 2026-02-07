@@ -75,10 +75,10 @@ SKILL MATRIX:
     output: `
 CONTACT CHANNELS:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  📧 Email:     hello@artemshkonda.dev
-  💬 Telegram:  @artem_shkonda
-  🔗 GitHub:    github.com/artemshkonda
-  💼 LinkedIn:  linkedin.com/in/artemshkonda
+  📧 Email:     artemskonda@gmail.com  
+  💬 Telegram:  @artem_qaa
+  🔗 GitHub:    github.com/shkoda-hub
+  💼 LinkedIn:  linkedin.com/in/artem-shkonda-4a9051298/
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 STATUS: ● ONLINE
 `,
