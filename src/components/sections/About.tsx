@@ -145,19 +145,33 @@ export default function About() {
     return () => clearInterval(interval);
   }, [phase]);
 
+  // Phase 3: After description, move to capabilities
+  useEffect(() => {
+    if (phase !== 3) return;
+    const timer = setTimeout(() => {
+      setPhase(4);
+      setCapIndex(0);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [phase]);
+
   // Phase 4: Capabilities one by one
   useEffect(() => {
-    if (phase !== 4) return;
-    if (capIndex < 0) {
-      setCapIndex(0);
-      return;
-    }
+    if (phase !== 4 || capIndex < 0) return;
+
     if (capIndex >= capabilities.length) {
       setTimeout(() => {
         setPhase(5);
         setStatIndex(0);
       }, 300);
+      return;
     }
+
+    const timer = setTimeout(() => {
+      setCapIndex(capIndex + 1);
+    }, 300);
+
+    return () => clearTimeout(timer);
   }, [phase, capIndex]);
 
   // Phase 5: Stats one by one
@@ -279,12 +293,6 @@ export default function About() {
                     <p>
                       PRIMARY WEAPON: <span className="glow neon-text">NODE.JS</span>
                     </p>
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                      onAnimationComplete={() => setTimeout(() => setPhase(4), 200)}
-                    />
                   </motion.div>
                 )}
 
@@ -296,28 +304,25 @@ export default function About() {
                       {capabilities.map((cap, i) => (
                         <motion.div
                           key={cap.text}
-                          initial={{ opacity: 0, x: -20 }}
+                          initial={{ opacity: 0.3, x: -20 }}
                           animate={{
                             opacity: i <= capIndex ? 1 : 0.3,
                             x: i <= capIndex ? 0 : -20
                           }}
+                          transition={{ duration: 0.3 }}
                           className={`flex items-center gap-3 p-2 border transition-all ${
                             i < capIndex ? "border-[--green]" : i === capIndex ? "border-[--green]" : "border-[--green-dim]"
                           }`}
-                          onAnimationComplete={() => {
-                            if (i === capIndex) {
-                              setTimeout(() => setCapIndex(capIndex + 1), 150);
-                            }
-                          }}
                         >
-                          {i <= capIndex && (
+                          {i <= capIndex ? (
                             <>
                               <span className="text-xl">{cap.icon}</span>
                               <span className={i < capIndex ? "text-[--green]" : ""}>{cap.text}</span>
                               {i < capIndex && <span className="ml-auto text-[--green]">✓</span>}
                             </>
+                          ) : (
+                            <span className="text-[--green-dim]">...</span>
                           )}
-                          {i > capIndex && <span className="text-[--green-dim]">...</span>}
                         </motion.div>
                       ))}
                     </div>
