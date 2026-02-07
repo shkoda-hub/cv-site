@@ -15,7 +15,7 @@ function MobileMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
     { href: "#skills", label: "/SKILLS" },
     { href: "#experience", label: "/EXP" },
     { href: "#projects", label: "/PROJECTS" },
-    { href: "/blog", label: "/BLOG" },
+    // { href: "/blog", label: "/BLOG" }, // Hidden for now
     { href: "#contact", label: "/CONTACT" },
   ];
 
@@ -75,7 +75,7 @@ export default function Home() {
             <a href="#skills" className="hover:text-[--green] hover:glow transition-colors">/SKILLS</a>
             <a href="#experience" className="hover:text-[--green] hover:glow transition-colors">/EXP</a>
             <a href="#projects" className="hover:text-[--green] hover:glow transition-colors">/PROJECTS</a>
-            <a href="/blog" className="hover:text-[--green] hover:glow transition-colors">/BLOG</a>
+            {/* <a href="/blog" className="hover:text-[--green] hover:glow transition-colors">/BLOG</a> */}
             <a href="#contact" className="hover:text-[--green] hover:glow transition-colors">/CONTACT</a>
           </div>
 
