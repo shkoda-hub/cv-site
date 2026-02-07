@@ -670,24 +670,26 @@ export default function Hero() {
                     <span>:</span>
                     <span className="text-blue-400">~</span>
                     <span>#</span>
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      className="flex-1 bg-transparent outline-none"
-                      style={{ color: "#50fa7b", caretColor: "#50fa7b" }}
-                      spellCheck={false}
-                      autoComplete="off"
-                      autoCapitalize="off"
-                    />
-                    <motion.span
-                      className="w-2 h-5"
-                      style={{ backgroundColor: "#50fa7b" }}
-                      animate={{ opacity: [1, 0, 1] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                    />
+                    <div className="flex-1 flex items-center">
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        className="bg-transparent outline-none w-auto min-w-[1ch]"
+                        style={{ color: "#50fa7b", caretColor: "transparent", width: `${Math.max(input.length, 1)}ch` }}
+                        spellCheck={false}
+                        autoComplete="off"
+                        autoCapitalize="off"
+                      />
+                      <motion.span
+                        className="w-2 h-5 inline-block"
+                        style={{ backgroundColor: "#50fa7b" }}
+                        animate={{ opacity: [1, 0, 1] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
