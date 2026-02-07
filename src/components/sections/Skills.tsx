@@ -16,9 +16,9 @@ const skills = [
   { name: "GRAPHQL", level: 60, category: "backend" },
 ];
 
-const categoryColors = {
-  backend: "--green",
-  database: "--amber",
+const categoryColors: Record<string, string> = {
+  backend: "#33ff33",
+  database: "#ffb000",
   devops: "#00ffff",
 };
 
@@ -90,12 +90,12 @@ function AnimatedSkillBar({
             <motion.div
               className="h-full"
               style={{
-                backgroundColor: `var(${categoryColors[category as keyof typeof categoryColors] || '--green'})`,
-                boxShadow: `0 0 10px var(${categoryColors[category as keyof typeof categoryColors] || '--green'})`
+                backgroundColor: categoryColors[category] || "#33ff33",
+                boxShadow: `0 0 10px ${categoryColors[category] || "#33ff33"}`
               }}
               initial={{ width: 0 }}
-              animate={isInView ? { width: `${displayLevel}%` } : { width: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
+              animate={{ width: `${level}%` }}
+              transition={{ duration: 1, delay: index * 0.1, ease: "easeOut" }}
             />
           </div>
           <span className="text-[--green-dim] text-xs md:text-sm">]</span>
@@ -103,8 +103,11 @@ function AnimatedSkillBar({
 
         {/* Percentage */}
         <span
-          className="w-10 md:w-12 text-right glow text-xs md:text-sm shrink-0"
-          style={{ color: `var(${categoryColors[category as keyof typeof categoryColors] || '--green'})` }}
+          className="w-10 md:w-12 text-right text-xs md:text-sm shrink-0"
+          style={{
+            color: categoryColors[category] || "#33ff33",
+            textShadow: `0 0 10px ${categoryColors[category] || "#33ff33"}`
+          }}
         >
           {displayLevel}%
         </span>
