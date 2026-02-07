@@ -4,33 +4,27 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 
 const skills = [
-  { name: "NODE.JS", level: 90, category: "backend" },
-  { name: "TYPESCRIPT", level: 90, category: "backend" },
-  { name: "NESTJS", level: 80, category: "backend" },
-  { name: "POSTGRESQL", level: 80, category: "database" },
-  { name: "MONGODB", level: 70, category: "database" },
-  { name: "REDIS", level: 70, category: "database" },
-  { name: "DOCKER", level: 80, category: "devops" },
-  { name: "KUBERNETES", level: 50, category: "devops" },
-  { name: "AWS", level: 60, category: "devops" },
-  { name: "GRAPHQL", level: 60, category: "backend" },
+  { name: "NODE.JS", level: 90 },
+  { name: "TYPESCRIPT", level: 90 },
+  { name: "NESTJS", level: 80 },
+  { name: "POSTGRESQL", level: 80 },
+  { name: "MONGODB", level: 70 },
+  { name: "REDIS", level: 70 },
+  { name: "DOCKER", level: 80 },
+  { name: "KUBERNETES", level: 50 },
+  { name: "AWS", level: 60 },
+  { name: "GRAPHQL", level: 60 },
 ];
 
-const categoryColors: Record<string, string> = {
-  backend: "#33ff33",
-  database: "#ffb000",
-  devops: "#00ffff",
-};
+const SKILL_COLOR = "#33ff33";
 
 function AnimatedSkillBar({
   name,
   level,
-  category,
   index
 }: {
   name: string;
   level: number;
-  category: string;
   index: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -90,8 +84,8 @@ function AnimatedSkillBar({
             <motion.div
               className="h-full"
               style={{
-                backgroundColor: categoryColors[category] || "#33ff33",
-                boxShadow: `0 0 10px ${categoryColors[category] || "#33ff33"}`
+                backgroundColor: SKILL_COLOR,
+                boxShadow: `0 0 10px ${SKILL_COLOR}`
               }}
               initial={{ width: 0 }}
               animate={{ width: `${level}%` }}
@@ -105,8 +99,8 @@ function AnimatedSkillBar({
         <span
           className="w-10 md:w-12 text-right text-xs md:text-sm shrink-0"
           style={{
-            color: categoryColors[category] || "#33ff33",
-            textShadow: `0 0 10px ${categoryColors[category] || "#33ff33"}`
+            color: SKILL_COLOR,
+            textShadow: `0 0 10px ${SKILL_COLOR}`
           }}
         >
           {displayLevel}%
@@ -183,22 +177,6 @@ export default function Skills() {
                 ► SKILL MATRIX LOADED
               </div>
             </motion.div>
-
-            {/* Legend */}
-            <div className="flex flex-wrap gap-3 md:gap-6 mb-6 text-xs md:text-sm">
-              <div className="flex items-center gap-1 md:gap-2">
-                <span className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-[--green]" />
-                <span className="text-[--green-dim]">BACKEND</span>
-              </div>
-              <div className="flex items-center gap-1 md:gap-2">
-                <span className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-[--amber]" />
-                <span className="text-[--green-dim]">DATABASE</span>
-              </div>
-              <div className="flex items-center gap-1 md:gap-2">
-                <span className="w-2 h-2 md:w-3 md:h-3 rounded-full" style={{ backgroundColor: "#00ffff" }} />
-                <span className="text-[--green-dim]">DEVOPS</span>
-              </div>
-            </div>
 
             {/* Skills list */}
             <div className="space-y-1 font-mono">

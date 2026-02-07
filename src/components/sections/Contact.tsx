@@ -6,29 +6,29 @@ import { motion, useInView } from "framer-motion";
 const socialLinks = [
   {
     name: "EMAIL",
-    value: "HELLO@ARTEMSHKONDA.DEV",
-    href: "mailto:hello@artemshkonda.dev",
+    value: "ARTEMSKONDA@GMAIL.COM",
+    href: "mailto:artemskonda@gmail.com",
     icon: "📧",
     cmd: "mail -s"
   },
   {
     name: "TELEGRAM",
-    value: "@ARTEM_SHKONDA",
-    href: "https://t.me/artem_shkonda",
+    value: "@ARTEM_QAA",
+    href: "https://t.me/artem_qaa",
     icon: "💬",
     cmd: "tg --connect"
   },
   {
     name: "GITHUB",
-    value: "/ARTEMSHKONDA",
-    href: "https://github.com/artemshkonda",
+    value: "/SHKODA-HUB",
+    href: "https://github.com/shkoda-hub",
     icon: "🔗",
     cmd: "git clone"
   },
   {
     name: "LINKEDIN",
-    value: "/IN/ARTEMSHKONDA",
-    href: "https://linkedin.com/in/artemshkonda",
+    value: "/IN/ARTEM-SHKONDA",
+    href: "https://linkedin.com/in/artem-shkonda-4a9051298/",
     icon: "💼",
     cmd: "curl -X GET"
   },
