@@ -14,11 +14,13 @@ interface HistoryItem {
 function TypingOutput({
   text,
   speed = 5,
-  onComplete
+  onComplete,
+  onUpdate
 }: {
   text: string;
   speed?: number;
   onComplete?: () => void;
+  onUpdate?: () => void;
 }) {
   const [displayed, setDisplayed] = useState("");
   const [done, setDone] = useState(false);
@@ -31,13 +33,14 @@ function TypingOutput({
       const charsToAdd = Math.min(3, text.length - displayed.length);
       const timeout = setTimeout(() => {
         setDisplayed(text.slice(0, displayed.length + charsToAdd));
+        onUpdate?.();
       }, speed);
       return () => clearTimeout(timeout);
     } else {
       setDone(true);
       onComplete?.();
     }
-  }, [displayed, text, speed, done, onComplete]);
+  }, [displayed, text, speed, done, onComplete, onUpdate]);
 
   return <>{displayed}</>;
 }
@@ -436,11 +439,15 @@ export default function Hero() {
     }
   }, [introPhase]);
 
-  useEffect(() => {
+  const scrollToBottom = useCallback(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-  }, [history]);
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [history, scrollToBottom]);
 
   const executeCommand = useCallback((cmd: string) => {
     const trimmedCmd = cmd.trim().toLowerCase();
@@ -720,6 +727,7 @@ export default function Hero() {
                           <TypingOutput
                             text={item.output}
                             speed={3}
+                            onUpdate={scrollToBottom}
                             onComplete={() => {
                               setHistory(prev => prev.map((h, idx) =>
                                 idx === i ? { ...h, isTyping: false } : h
