@@ -124,6 +124,35 @@ interface HistoryItem {
   command: string;
   output: string;
   isError?: boolean;
+  isTyping?: boolean;
+}
+
+// Typing output for terminal
+function TypingTerminalOutput({
+  text,
+  onUpdate,
+  onComplete
+}: {
+  text: string;
+  onUpdate?: () => void;
+  onComplete?: () => void;
+}) {
+  const [displayed, setDisplayed] = useState("");
+
+  useEffect(() => {
+    if (displayed.length < text.length) {
+      const charsToAdd = Math.min(4, text.length - displayed.length);
+      const timeout = setTimeout(() => {
+        setDisplayed(text.slice(0, displayed.length + charsToAdd));
+        onUpdate?.();
+      }, 5);
+      return () => clearTimeout(timeout);
+    } else {
+      onComplete?.();
+    }
+  }, [displayed, text, onUpdate, onComplete]);
+
+  return <>{displayed}</>;
 }
 
 const COMMANDS: Record<string, string> = {
@@ -210,7 +239,7 @@ Just kidding! This is just a portfolio 😄
 
 function TerminalModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [history, setHistory] = useState<HistoryItem[]>([
-    { command: "", output: 'Welcome to ArtemOS Terminal v2.0\nType "help" for available commands.' }
+    { command: "", output: 'Welcome to ArtemOS Terminal v2.0\nType "help" for available commands.', isTyping: true }
   ]);
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -222,11 +251,15 @@ function TerminalModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
     }
   }, [isOpen]);
 
-  useEffect(() => {
+  const scrollToBottom = useCallback(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-  }, [history]);
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [history, scrollToBottom]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -254,12 +287,13 @@ function TerminalModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
 
     const output = COMMANDS[trimmedCmd];
     if (output) {
-      setHistory(prev => [...prev, { command: cmd, output }]);
+      setHistory(prev => [...prev, { command: cmd, output, isTyping: true }]);
     } else {
       setHistory(prev => [...prev, {
         command: cmd,
         output: `Command not found: ${trimmedCmd}\nType "help" for available commands.`,
-        isError: true
+        isError: true,
+        isTyping: true
       }]);
     }
   };
@@ -321,7 +355,19 @@ function TerminalModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
               )}
               <pre className={`whitespace-pre-wrap mt-1 ${item.isError ? "text-red-400" : ""}`}
                 style={{ color: item.isError ? undefined : "#50fa7b" }}>
-                {item.output}
+                {item.isTyping ? (
+                  <TypingTerminalOutput
+                    text={item.output}
+                    onUpdate={scrollToBottom}
+                    onComplete={() => {
+                      setHistory(prev => prev.map((h, idx) =>
+                        idx === i ? { ...h, isTyping: false } : h
+                      ));
+                    }}
+                  />
+                ) : (
+                  item.output
+                )}
               </pre>
             </div>
           ))}
