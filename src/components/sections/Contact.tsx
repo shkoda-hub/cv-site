@@ -155,7 +155,7 @@ function ChannelCard({
 
 export default function Contact() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
 
   const [phase, setPhase] = useState<"idle" | "init" | "pinging" | "complete">("idle");
   const [initProgress, setInitProgress] = useState(0);
