@@ -128,51 +128,72 @@ interface HistoryItem {
 
 const COMMANDS: Record<string, string> = {
   help: `
-╔═══════════════════════════════════════════════════════════╗
-║                    AVAILABLE COMMANDS                      ║
-╠═══════════════════════════════════════════════════════════╣
-║  help       - Show this help message                       ║
-║  whoami     - Who am I?                                    ║
-║  skills     - List my technical skills                     ║
-║  projects   - View my projects                             ║
-║  contact    - Contact information                          ║
-║  clear      - Clear terminal                               ║
-║  sudo       - Try to get root access ;)                    ║
-║  hack       - ???                                          ║
-║  exit       - Close terminal                               ║
-╚═══════════════════════════════════════════════════════════╝
+AVAILABLE COMMANDS:
+-------------------------------------------
+  help      - Show this help message
+  whoami    - Who am I?
+  skills    - List my technical skills
+  projects  - View my projects
+  contact   - Contact information
+  clear     - Clear terminal
+  sudo      - Try to get root access ;)
+  hack      - ???
+  exit      - Close terminal
+-------------------------------------------
 `,
   whoami: `
 ARTEM SHKONDA
-├─ ROLE:      Backend Developer
-├─ STACK:     Node.js / TypeScript / PostgreSQL
-├─ EXP:       5+ years
-├─ LOCATION:  Kyiv, Ukraine
-└─ STATUS:    Open to opportunities
+-------------------------------------------
+  ROLE:      Backend Developer
+  STACK:     Node.js / TypeScript / PostgreSQL
+  EXP:       5+ years
+  LOCATION:  Kyiv, Ukraine
+  STATUS:    Open to opportunities
 `,
   skills: `
-[BACKEND]  Node.js ████████░░ 90%  |  TypeScript ████████░░ 90%
-[DATABASE] PostgreSQL ████████░░ 80%  |  MongoDB ███████░░░ 70%
-[DEVOPS]   Docker ████████░░ 80%  |  Kubernetes █████░░░░░ 50%
+SKILL MATRIX:
+-------------------------------------------
+[BACKEND]
+  Node.js      ████████████████████░░ 90%
+  TypeScript   ████████████████████░░ 90%
+
+[DATABASE]
+  PostgreSQL   ████████████████░░░░░░ 80%
+  MongoDB      ██████████████░░░░░░░░ 70%
+
+[DEVOPS]
+  Docker       ████████████████░░░░░░ 80%
+  Kubernetes   ██████████░░░░░░░░░░░░ 50%
 `,
   projects: `
-[001] ECOMMERCE-API    - Scalable REST API with microservices
-[002] REALTIME-CHAT    - WebSocket chat with rooms
-[003] TASK-MANAGER     - Kanban boards with time tracking
-[004] PAYMENT-GATEWAY  - Secure payment integration
+PROJECTS:
+-------------------------------------------
+[001] ECOMMERCE-API
+      Scalable REST API with microservices
 
-→ github.com/shkoda-hub
+[002] REALTIME-CHAT
+      WebSocket chat with rooms
+
+[003] TASK-MANAGER
+      Kanban boards with time tracking
+
+[004] PAYMENT-GATEWAY
+      Secure payment integration
+
+> github.com/shkoda-hub
 `,
   contact: `
-📧 Email:     artemskonda@gmail.com
-💬 Telegram:  @artem_qaa
-🔗 GitHub:    github.com/shkoda-hub
-💼 LinkedIn:  linkedin.com/in/artem-shkonda-4a9051298/
+CONTACT:
+-------------------------------------------
+  Email:     artemskonda@gmail.com
+  Telegram:  @artem_qaa
+  GitHub:    github.com/shkoda-hub
+  LinkedIn:  linkedin.com/in/artem-shkonda
 `,
   sudo: `Nice try! But you don't have root access here 😏`,
   hack: `
-⚠️ INITIATING HACK SEQUENCE...
-[■■■■■■■■■■] 100% - ACCESS GRANTED ✓
+> INITIATING HACK SEQUENCE...
+[##########] 100% - ACCESS GRANTED
 Just kidding! This is just a portfolio 😄
 `,
   neofetch: `
