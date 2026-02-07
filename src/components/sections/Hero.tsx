@@ -1,63 +1,22 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-interface HistoryItem {
-  command: string;
-  output: string | React.ReactNode;
-  isError?: boolean;
-  isTyping?: boolean;
-}
+// ==================== TYPING COMPONENTS ====================
 
-// Typing output effect
-function TypingOutput({
-  text,
-  speed = 5,
-  onComplete,
-  onUpdate
-}: {
-  text: string;
-  speed?: number;
-  onComplete?: () => void;
-  onUpdate?: () => void;
-}) {
-  const [displayed, setDisplayed] = useState("");
-  const [done, setDone] = useState(false);
-
-  useEffect(() => {
-    if (done) return;
-
-    if (displayed.length < text.length) {
-      // Type multiple characters at once for speed
-      const charsToAdd = Math.min(3, text.length - displayed.length);
-      const timeout = setTimeout(() => {
-        setDisplayed(text.slice(0, displayed.length + charsToAdd));
-        onUpdate?.();
-      }, speed);
-      return () => clearTimeout(timeout);
-    } else {
-      setDone(true);
-      onComplete?.();
-    }
-  }, [displayed, text, speed, done, onComplete, onUpdate]);
-
-  return <>{displayed}</>;
-}
-
-// ==================== INTRO ANIMATION COMPONENTS ====================
-
-// Typing effect with cursor
 function TypeWriter({
   text,
   delay = 0,
   speed = 50,
   onComplete,
+  showCursor = true
 }: {
   text: string;
   delay?: number;
   speed?: number;
   onComplete?: () => void;
+  showCursor?: boolean;
 }) {
   const [displayed, setDisplayed] = useState("");
   const [started, setStarted] = useState(false);
@@ -84,19 +43,26 @@ function TypeWriter({
   return (
     <span>
       {displayed}
-      {!done && started && <span className="animate-pulse">_</span>}
+      {showCursor && !done && started && <span className="animate-pulse">_</span>}
     </span>
   );
 }
 
-// Progress bar animation
+function GlitchText({ text, className = "" }: { text: string; className?: string }) {
+  return (
+    <span className={`glitch-wrapper ${className}`}>
+      <span className="glitch-text" data-text={text}>{text}</span>
+    </span>
+  );
+}
+
 function HackProgress({ onComplete }: { onComplete: () => void }) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress(p => {
-        const increment = Math.random() * 12 + 4;
+        const increment = Math.random() * 15 + 5;
         const newProgress = Math.min(p + increment, 100);
         if (newProgress >= 100) {
           clearInterval(interval);
@@ -104,7 +70,7 @@ function HackProgress({ onComplete }: { onComplete: () => void }) {
         }
         return newProgress;
       });
-    }, 120);
+    }, 150);
 
     return () => clearInterval(interval);
   }, [onComplete]);
@@ -125,7 +91,6 @@ function HackProgress({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-// Random data stream
 function DataStream() {
   const [lines, setLines] = useState<string[]>([]);
   const chars = "0123456789ABCDEF";
@@ -138,11 +103,8 @@ function DataStream() {
     };
 
     const interval = setInterval(() => {
-      setLines(prev => {
-        const newLines = [...prev, generateLine()];
-        return newLines.slice(-6);
-      });
-    }, 80);
+      setLines(prev => [...prev.slice(-6), generateLine()]);
+    }, 100);
 
     return () => clearInterval(interval);
   }, []);
@@ -156,73 +118,16 @@ function DataStream() {
   );
 }
 
-// ==================== TERMINAL EASTER EGGS ====================
+// ==================== TERMINAL MODAL ====================
 
-function MatrixBurst({ onComplete }: { onComplete: () => void }) {
-  const [lines, setLines] = useState<string[]>([]);
-
-  useEffect(() => {
-    const chars = "アイウエオカキクケコサシスセソタチツテト0123456789ABCDEF";
-    let count = 0;
-    const interval = setInterval(() => {
-      const line = Array(60).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join("");
-      setLines(prev => [...prev.slice(-15), line]);
-      count++;
-      if (count > 20) {
-        clearInterval(interval);
-        setTimeout(onComplete, 500);
-      }
-    }, 50);
-    return () => clearInterval(interval);
-  }, [onComplete]);
-
-  return (
-    <div className="text-[#50fa7b] text-xs font-mono opacity-80 overflow-hidden">
-      {lines.map((line, i) => (
-        <div key={i} className="truncate" style={{ opacity: 1 - (lines.length - i) * 0.05 }}>{line}</div>
-      ))}
-    </div>
-  );
+interface HistoryItem {
+  command: string;
+  output: string;
+  isError?: boolean;
 }
 
-function HackSequence({ onComplete }: { onComplete: () => void }) {
-  const [step, setStep] = useState(0);
-  const steps = [
-    "[■□□□□□□□□□] 10% - Bypassing firewall...",
-    "[■■■□□□□□□□] 30% - Injecting payload...",
-    "[■■■■■□□□□□] 50% - Accessing mainframe...",
-    "[■■■■■■■□□□] 70% - Decrypting data...",
-    "[■■■■■■■■■□] 90% - Almost there...",
-    "[■■■■■■■■■■] 100% - ACCESS GRANTED ✓",
-  ];
-
-  useEffect(() => {
-    if (step < steps.length) {
-      const timer = setTimeout(() => setStep(step + 1), 400);
-      return () => clearTimeout(timer);
-    } else {
-      setTimeout(onComplete, 800);
-    }
-  }, [step, steps.length, onComplete]);
-
-  return (
-    <div className="space-y-1">
-      <div className="text-red-500 glow">⚠️ INITIATING HACK SEQUENCE...</div>
-      {steps.slice(0, step).map((s, i) => (
-        <div key={i} className={i === step - 1 ? "text-[#50fa7b] glow" : "text-[#50fa7b]"}>{s}</div>
-      ))}
-      {step >= steps.length && (
-        <div className="mt-2 text-[--green-dim]">Just kidding! This is just a portfolio 😄</div>
-      )}
-    </div>
-  );
-}
-
-// ==================== TERMINAL COMMANDS ====================
-
-const COMMANDS: Record<string, { output: string | ((setSpecial: (v: string | null) => void) => string | React.ReactNode) }> = {
-  help: {
-    output: `
+const COMMANDS: Record<string, string> = {
+  help: `
 ╔═══════════════════════════════════════════════════════════╗
 ║                    AVAILABLE COMMANDS                      ║
 ╠═══════════════════════════════════════════════════════════╣
@@ -231,312 +136,228 @@ const COMMANDS: Record<string, { output: string | ((setSpecial: (v: string | nul
 ║  skills     - List my technical skills                     ║
 ║  projects   - View my projects                             ║
 ║  contact    - Contact information                          ║
-║  experience - Work experience                              ║
 ║  clear      - Clear terminal                               ║
 ║  sudo       - Try to get root access ;)                    ║
 ║  hack       - ???                                          ║
-║  matrix     - ???                                          ║
-╚═══════════════════════════════════════════════════════════╝
-
-TIP: You can also scroll down to explore the page.
-`,
-  },
-  whoami: {
-    output: `
-╔═══════════════════════════════════════════════════════════╗
-║                      ARTEM SHKONDA                         ║
-╠═══════════════════════════════════════════════════════════╣
-║  ROLE:      Backend Developer                              ║
-║  STACK:     Node.js / TypeScript / PostgreSQL              ║
-║  EXP:       5+ years                                       ║
-║  LOCATION:  Kyiv, Ukraine                                  ║
-║  STATUS:    Open to opportunities                          ║
+║  exit       - Close terminal                               ║
 ╚═══════════════════════════════════════════════════════════╝
 `,
-  },
-  skills: {
-    output: `
-SKILL MATRIX:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-[BACKEND]
-  Node.js      [████████████████████░░] 90%
-  TypeScript   [████████████████████░░] 90%
-  NestJS       [████████████████░░░░░░] 80%
-  GraphQL      [████████████░░░░░░░░░░] 60%
-
-[DATABASE]
-  PostgreSQL   [████████████████░░░░░░] 80%
-  MongoDB      [██████████████░░░░░░░░] 70%
-  Redis        [██████████████░░░░░░░░] 70%
-
-[DEVOPS]
-  Docker       [████████████████░░░░░░] 80%
-  Kubernetes   [██████████░░░░░░░░░░░░] 50%
-  AWS          [████████████░░░░░░░░░░] 60%
-
-→ Scroll to #skills for animated view
+  whoami: `
+ARTEM SHKONDA
+├─ ROLE:      Backend Developer
+├─ STACK:     Node.js / TypeScript / PostgreSQL
+├─ EXP:       5+ years
+├─ LOCATION:  Kyiv, Ukraine
+└─ STATUS:    Open to opportunities
 `,
-  },
-  projects: {
-    output: `
-PROJECT DATABASE:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-[001] ECOMMERCE-API         [PRODUCTION]
-      Scalable REST API with microservices architecture
-      Stack: Node.js, NestJS, PostgreSQL, Redis
-
-[002] REALTIME-CHAT         [PRODUCTION]
-      WebSocket chat with rooms and file sharing
-      Stack: Node.js, Socket.io, MongoDB, S3
-
-[003] TASK-MANAGER          [PRODUCTION]
-      Kanban boards with time tracking and analytics
-      Stack: Node.js, Express, PostgreSQL, React
-
-[004] PAYMENT-GATEWAY       [PRODUCTION]
-      Secure payment integration with webhooks
-      Stack: Node.js, TypeScript, Stripe, Redis
-
-→ View all: github.com/shkoda-hub
+  skills: `
+[BACKEND]  Node.js ████████░░ 90%  |  TypeScript ████████░░ 90%
+[DATABASE] PostgreSQL ████████░░ 80%  |  MongoDB ███████░░░ 70%
+[DEVOPS]   Docker ████████░░ 80%  |  Kubernetes █████░░░░░ 50%
 `,
-  },
-  contact: {
-    output: `
-CONTACT CHANNELS:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  📧 Email:     artemskonda@gmail.com
-  💬 Telegram:  @artem_qaa
-  🔗 GitHub:    github.com/shkoda-hub
-  💼 LinkedIn:  linkedin.com/in/artem-shkonda-4a9051298/
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-STATUS: ● ONLINE | TIMEZONE: EET (UTC+2)
+  projects: `
+[001] ECOMMERCE-API    - Scalable REST API with microservices
+[002] REALTIME-CHAT    - WebSocket chat with rooms
+[003] TASK-MANAGER     - Kanban boards with time tracking
+[004] PAYMENT-GATEWAY  - Secure payment integration
+
+→ github.com/shkoda-hub
 `,
-  },
-  experience: {
-    output: `
-CAREER TIMELINE:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-[2022-NOW]  SENIOR BACKEND DEVELOPER @ TECH COMPANY
-            Microservices, API optimization, Team Lead
-
-[2020-2022] BACKEND DEVELOPER @ STARTUP INC
-            REST API, Database design, Auth systems
-
-[2018-2020] JUNIOR DEVELOPER @ DIGITAL AGENCY
-            Web apps, Code reviews, Testing
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TOTAL: 5+ years of experience
+  contact: `
+📧 Email:     artemskonda@gmail.com
+💬 Telegram:  @artem_qaa
+🔗 GitHub:    github.com/shkoda-hub
+💼 LinkedIn:  linkedin.com/in/artem-shkonda-4a9051298/
 `,
-  },
-  sudo: {
-    output: `
-[sudo] password for visitor: ********
-Sorry, try again.
-[sudo] password for visitor: ********
-sudo: 3 incorrect password attempts
-
-Nice try! But you don't have root access here 😏
+  sudo: `Nice try! But you don't have root access here 😏`,
+  hack: `
+⚠️ INITIATING HACK SEQUENCE...
+[■■■■■■■■■■] 100% - ACCESS GRANTED ✓
+Just kidding! This is just a portfolio 😄
 `,
-  },
-  hack: {
-    output: (setSpecial) => {
-      setSpecial("hack");
-      return "";
-    },
-  },
-  matrix: {
-    output: (setSpecial) => {
-      setSpecial("matrix");
-      return "";
-    },
-  },
-  ls: {
-    output: `about_me.txt  skills.dat  projects/  experience.log  contact.sh  secrets/`,
-  },
-  "cat about_me.txt": {
-    output: `Hi! I'm Artem, a backend developer who loves building scalable systems.`,
-  },
-  "ls secrets": {
-    output: `Permission denied: /secrets/ — Just kidding, nothing here... or is there? 👀`,
-  },
-  "rm -rf /": {
-    output: `Nice try! System protected. This is a static website 😄`,
-  },
-  neofetch: {
-    output: `
-        .--.         artem@portfolio
-       |o_o |        OS: ArtemOS v2.0
-       |:_/ |        Kernel: Next.js 14
-      //   \\ \\       Shell: React Terminal
-     (|     | )      Theme: Cyberpunk Green
-    /'\\_   _/\`\\      CPU: Node.js Runtime
-    \\___)=(___/      Memory: Unlimited Dreams
+  neofetch: `
+    .--.       artem@portfolio
+   |o_o |      OS: ArtemOS v2.0
+   |:_/ |      Shell: React Terminal
+  //   \\ \\     Theme: Cyberpunk
+ (|     | )    CPU: Node.js Runtime
 `,
-  },
-  exit: {
-    output: `You can't exit! Scroll down to explore more.`,
-  },
+  matrix: `Wake up, Neo... The Matrix has you...`,
+  ls: `about_me.txt  skills.dat  projects/  secrets/`,
+  "rm -rf /": `Nice try! System protected 😄`,
 };
 
-const scrollCommands: Record<string, string> = {
-  "goto about": "about",
-  "goto skills": "skills",
-  "goto projects": "projects",
-  "goto experience": "experience",
-  "goto contact": "contact",
-  "cd about": "about",
-  "cd skills": "skills",
-  "cd projects": "projects",
-  "cd experience": "experience",
-  "cd contact": "contact",
-};
-
-// ==================== MAIN COMPONENT ====================
-
-export default function Hero() {
-  // Intro animation phases
-  const [introPhase, setIntroPhase] = useState(0);
-  // 0: ACCESS DENIED
-  // 1: Hacking started
-  // 2: Progress bar
-  // 3: ACCESS GRANTED
-  // 4: Terminal ready
-
-  // Terminal state
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+function TerminalModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [history, setHistory] = useState<HistoryItem[]>([
+    { command: "", output: 'Welcome to ArtemOS Terminal v2.0\nType "help" for available commands.' }
+  ]);
   const [input, setInput] = useState("");
-  const [commandHistory, setCommandHistory] = useState<string[]>([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
-  const [specialEffect, setSpecialEffect] = useState<string | null>(null);
-
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Start intro sequence
   useEffect(() => {
-    const timer = setTimeout(() => setIntroPhase(1), 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Initialize terminal after intro
-  useEffect(() => {
-    if (introPhase === 4) {
-      setHistory([{
-        command: "",
-        output: `
-╔═══════════════════════════════════════════════════════════╗
-║     Welcome to ArtemOS Terminal v2.0                       ║
-║     Type 'help' for commands or scroll down to explore     ║
-╚═══════════════════════════════════════════════════════════╝
-`,
-        isTyping: true
-      }]);
+    if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [introPhase]);
+  }, [isOpen]);
 
-  const scrollToBottom = useCallback(() => {
+  useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-  }, []);
+  }, [history]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [history, scrollToBottom]);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
-  const executeCommand = useCallback((cmd: string) => {
+  const executeCommand = (cmd: string) => {
     const trimmedCmd = cmd.trim().toLowerCase();
-    if (trimmedCmd === "") return;
-
-    setCommandHistory(prev => [...prev, trimmedCmd]);
-    setHistoryIndex(-1);
+    if (!trimmedCmd) return;
 
     if (trimmedCmd === "clear") {
       setHistory([]);
       return;
     }
 
-    if (scrollCommands[trimmedCmd]) {
-      const section = scrollCommands[trimmedCmd];
-      setHistory(prev => [...prev, { command: cmd, output: `Navigating to #${section}...`, isTyping: true }]);
-      setTimeout(() => {
-        document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
-      }, 500);
+    if (trimmedCmd === "exit") {
+      onClose();
       return;
     }
 
-    const command = COMMANDS[trimmedCmd];
-    if (command) {
-      const output = typeof command.output === "function"
-        ? command.output(setSpecialEffect)
-        : command.output;
-      setHistory(prev => [...prev, { command: cmd, output: output || "", isTyping: true }]);
+    const output = COMMANDS[trimmedCmd];
+    if (output) {
+      setHistory(prev => [...prev, { command: cmd, output }]);
     } else {
       setHistory(prev => [...prev, {
         command: cmd,
-        output: `Command not found: ${trimmedCmd}\nType 'help' for available commands.`,
-        isError: true,
-        isTyping: true,
+        output: `Command not found: ${trimmedCmd}\nType "help" for available commands.`,
+        isError: true
       }]);
     }
-  }, []);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       executeCommand(input);
       setInput("");
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      if (commandHistory.length > 0) {
-        const newIndex = historyIndex < commandHistory.length - 1 ? historyIndex + 1 : historyIndex;
-        setHistoryIndex(newIndex);
-        setInput(commandHistory[commandHistory.length - 1 - newIndex] || "");
-      }
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      if (historyIndex > 0) {
-        const newIndex = historyIndex - 1;
-        setHistoryIndex(newIndex);
-        setInput(commandHistory[commandHistory.length - 1 - newIndex] || "");
-      } else {
-        setHistoryIndex(-1);
-        setInput("");
-      }
-    } else if (e.key === "Tab") {
-      e.preventDefault();
-      const matches = Object.keys(COMMANDS).filter(c => c.startsWith(input.toLowerCase()));
-      if (matches.length === 1) {
-        setInput(matches[0]);
-      }
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <section className="min-h-screen flex items-center justify-center px-4 md:px-6 py-20 relative overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] bg-black bg-opacity-80 flex items-center justify-center p-4"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <motion.div
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        className="w-full max-w-3xl border-2 border-[--green] bg-black relative overflow-hidden"
+        onClick={() => inputRef.current?.focus()}
+      >
+        {/* Scanlines */}
+        <div className="absolute inset-0 pointer-events-none z-10 opacity-10"
+          style={{ background: "repeating-linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3) 1px, transparent 1px, transparent 2px)" }}
+        />
+
+        {/* Header */}
+        <div className="flex items-center justify-between p-3 border-b border-[--green]" style={{ backgroundColor: "rgba(80, 250, 123, 0.1)" }}>
+          <div className="flex items-center gap-3">
+            <div className="flex gap-2">
+              <button onClick={onClose} className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400" />
+              <span className="w-3 h-3 rounded-full bg-yellow-500" />
+              <span className="w-3 h-3 rounded-full bg-green-500" />
+            </div>
+            <span className="text-sm font-mono" style={{ color: "#50fa7b" }}>root@artem-system:~</span>
+          </div>
+          <span className="text-[--green-dim] text-xs">ESC to close</span>
+        </div>
+
+        {/* Content */}
+        <div ref={containerRef} className="h-[60vh] overflow-y-auto p-4 font-mono text-sm">
+          {history.map((item, i) => (
+            <div key={i} className="mb-3">
+              {item.command && (
+                <div className="flex items-center gap-2 text-[--green-dim]">
+                  <span style={{ color: "#50fa7b" }}>root@artem-system</span>
+                  <span>:</span>
+                  <span className="text-blue-400">~</span>
+                  <span>#</span>
+                  <span style={{ color: "#50fa7b" }}>{item.command}</span>
+                </div>
+              )}
+              <pre className={`whitespace-pre-wrap mt-1 ${item.isError ? "text-red-400" : ""}`}
+                style={{ color: item.isError ? undefined : "#50fa7b" }}>
+                {item.output}
+              </pre>
+            </div>
+          ))}
+
+          {/* Input */}
+          <div className="flex items-center gap-2 text-[--green-dim]">
+            <span style={{ color: "#50fa7b" }}>root@artem-system</span>
+            <span>:</span>
+            <span className="text-blue-400">~</span>
+            <span>#</span>
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="flex-1 bg-transparent outline-none"
+              style={{ color: "#50fa7b", caretColor: "#50fa7b" }}
+              spellCheck={false}
+            />
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ==================== MAIN HERO COMPONENT ====================
+
+export default function Hero() {
+  const [phase, setPhase] = useState(0);
+  const [terminalOpen, setTerminalOpen] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setPhase(1), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <section className="min-h-screen flex items-center justify-center px-6 py-20 relative overflow-hidden">
       {/* HUD corners */}
-      <div className="absolute top-20 left-4 md:left-6 w-16 md:w-20 h-16 md:h-20 border-l-2 border-t-2 border-[--green] opacity-50" />
-      <div className="absolute top-20 right-4 md:right-6 w-16 md:w-20 h-16 md:h-20 border-r-2 border-t-2 border-[--green] opacity-50" />
-      <div className="absolute bottom-6 left-4 md:left-6 w-16 md:w-20 h-16 md:h-20 border-l-2 border-b-2 border-[--green] opacity-50" />
-      <div className="absolute bottom-6 right-4 md:right-6 w-16 md:w-20 h-16 md:h-20 border-r-2 border-b-2 border-[--green] opacity-50" />
+      <div className="absolute top-20 left-6 w-20 h-20 border-l-2 border-t-2 border-[--green] opacity-50" />
+      <div className="absolute top-20 right-6 w-20 h-20 border-r-2 border-t-2 border-[--green] opacity-50" />
+      <div className="absolute bottom-6 left-6 w-20 h-20 border-l-2 border-b-2 border-[--green] opacity-50" />
+      <div className="absolute bottom-6 right-6 w-20 h-20 border-r-2 border-b-2 border-[--green] opacity-50" />
 
       {/* Scanning line */}
       <motion.div
-        className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#50fa7b] to-transparent opacity-30"
+        className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#50fa7b] to-transparent opacity-50"
         animate={{ top: ["0%", "100%", "0%"] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
       />
 
       <div className="max-w-4xl w-full">
         <AnimatePresence mode="wait">
-          {/* ==================== INTRO PHASES ==================== */}
-
           {/* Phase 0: Access Denied */}
-          {introPhase === 0 && (
+          {phase === 0 && (
             <motion.div
               key="denied"
               initial={{ opacity: 0 }}
@@ -558,8 +379,8 @@ export default function Hero() {
             </motion.div>
           )}
 
-          {/* Phase 1: Hacking initiated */}
-          {introPhase === 1 && (
+          {/* Phase 1: Hacking */}
+          {phase === 1 && (
             <motion.div
               key="hacking"
               initial={{ opacity: 0 }}
@@ -575,14 +396,14 @@ export default function Hero() {
                 <TypeWriter
                   text="► FIREWALL BREACH DETECTED..."
                   speed={30}
-                  onComplete={() => setTimeout(() => setIntroPhase(2), 500)}
+                  onComplete={() => setTimeout(() => setPhase(2), 500)}
                 />
               </div>
             </motion.div>
           )}
 
           {/* Phase 2: Progress */}
-          {introPhase === 2 && (
+          {phase === 2 && (
             <motion.div
               key="progress"
               initial={{ opacity: 0 }}
@@ -593,13 +414,13 @@ export default function Hero() {
               <div className="glow text-xl" style={{ color: "#50fa7b" }}>
                 ► BYPASSING SECURITY...
               </div>
-              <HackProgress onComplete={() => setIntroPhase(3)} />
+              <HackProgress onComplete={() => setPhase(3)} />
               <DataStream />
             </motion.div>
           )}
 
           {/* Phase 3: Access Granted */}
-          {introPhase === 3 && (
+          {phase === 3 && (
             <motion.div
               key="granted"
               initial={{ opacity: 0, scale: 0.8 }}
@@ -610,7 +431,6 @@ export default function Hero() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: [0, 1, 1, 0.8, 1] }}
-                transition={{ duration: 0.5 }}
                 className="text-4xl md:text-6xl font-bold glow"
                 style={{ color: "#50fa7b" }}
               >
@@ -623,43 +443,54 @@ export default function Hero() {
                 transition={{ delay: 0.5 }}
               >
                 <TypeWriter
-                  text="Loading terminal interface..."
+                  text="Loading user profile..."
                   delay={500}
-                  onComplete={() => setTimeout(() => setIntroPhase(4), 800)}
+                  onComplete={() => setTimeout(() => setPhase(4), 800)}
                 />
               </motion.div>
             </motion.div>
           )}
 
-          {/* ==================== INTERACTIVE TERMINAL ==================== */}
-
-          {introPhase === 4 && (
+          {/* Phase 4: Profile */}
+          {phase >= 4 && (
             <motion.div
-              key="terminal"
+              key="profile"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              className="space-y-6"
             >
-              {/* Mobile: Simple text name */}
-              <motion.div
-                className="md:hidden text-center mb-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                <h1 className="text-4xl font-bold glow" style={{ color: "#50fa7b" }}>ARTEM</h1>
-                <h1 className="text-4xl font-bold glow" style={{ color: "#50fa7b" }}>SHKONDA</h1>
-                <p className="text-[--green-dim] mt-2">BACKEND DEVELOPER</p>
-              </motion.div>
+              {/* Terminal window */}
+              <div className="border border-[--green] rounded-sm overflow-hidden">
+                <div className="px-4 py-2 flex items-center justify-between border-b border-[--green]" style={{ backgroundColor: "rgba(80, 250, 123, 0.1)" }}>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-red-500" />
+                    <span className="w-3 h-3 rounded-full bg-yellow-500" />
+                    <span className="w-3 h-3 rounded-full bg-green-500" />
+                  </div>
+                  <span className="text-sm" style={{ color: "#50fa7b" }}>root@artem-system:~</span>
+                  <div className="w-16" />
+                </div>
 
-              {/* Desktop: ASCII Art Name */}
-              <motion.pre
-                className="hidden md:block text-center mb-6 glow text-xs lg:text-sm overflow-x-auto"
-                style={{ color: "#50fa7b" }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
+                <div className="p-4 md:p-6 space-y-4">
+                  {/* Mobile: Simple text */}
+                  <motion.div
+                    className="md:hidden text-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <h1 className="text-3xl font-bold glow" style={{ color: "#50fa7b" }}>ARTEM</h1>
+                    <h1 className="text-3xl font-bold glow" style={{ color: "#50fa7b" }}>SHKONDA</h1>
+                  </motion.div>
+
+                  {/* Desktop: ASCII Art */}
+                  <motion.pre
+                    className="hidden md:block glow text-xs lg:text-sm overflow-x-auto"
+                    style={{ color: "#50fa7b" }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
 {`
  █████╗ ██████╗ ████████╗███████╗███╗   ███╗
 ██╔══██╗██╔══██╗╚══██╔══╝██╔════╝████╗ ████║
@@ -674,134 +505,90 @@ export default function Hero() {
         ███████║██║  ██║██║  ██╗╚██████╔╝██║ ╚████║██████╔╝██║  ██║
         ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═╝  ╚═╝
 `}
-              </motion.pre>
+                  </motion.pre>
 
-              {/* Terminal window */}
-              <div
-                className="border-2 border-[--green] bg-black bg-opacity-90 relative overflow-hidden"
-                onClick={() => inputRef.current?.focus()}
-              >
-                {/* Scanlines overlay */}
-                <div
-                  className="absolute inset-0 pointer-events-none z-10 opacity-10"
-                  style={{
-                    background: "repeating-linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3) 1px, transparent 1px, transparent 2px)",
-                  }}
-                />
+                  {/* Profile info */}
+                  <motion.div
+                    className="space-y-2 text-sm md:text-lg"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-[--green-dim]">$</span>
+                      <span className="text-[--green-dim]">cat</span>
+                      <span style={{ color: "#50fa7b" }}>profile.txt</span>
+                    </div>
 
-                {/* Terminal header */}
-                <div className="flex items-center justify-between px-4 py-2 border-b border-[--green]" style={{ backgroundColor: "rgba(80, 250, 123, 0.1)" }}>
-                  <div className="flex items-center gap-3">
-                    <div className="flex gap-2">
-                      <span className="w-3 h-3 rounded-full bg-red-500" />
-                      <span className="w-3 h-3 rounded-full bg-yellow-500" />
-                      <span className="w-3 h-3 rounded-full bg-green-500" />
+                    <div className="pl-3 md:pl-4 border-l-2 border-[--green-dim] space-y-1">
+                      <div>
+                        <span className="text-[--green-dim]">ROLE:</span>{" "}
+                        <GlitchText text="BACKEND DEVELOPER" className="glow" />
+                      </div>
+                      <div>
+                        <span className="text-[--green-dim]">STACK:</span>{" "}
+                        <span className="glow text-xs md:text-lg" style={{ color: "#50fa7b" }}>NODE.JS / TYPESCRIPT / POSTGRESQL</span>
+                      </div>
+                      <div>
+                        <span className="text-[--green-dim]">EXP:</span>{" "}
+                        <span className="glow" style={{ color: "#50fa7b" }}>5+ YEARS</span>
+                      </div>
+                      <div>
+                        <span className="text-[--green-dim]">LOCATION:</span>{" "}
+                        <span className="glow" style={{ color: "#50fa7b" }}>KYIV, UKRAINE</span>
+                      </div>
                     </div>
-                    <span className="text-sm font-mono" style={{ color: "#50fa7b" }}>root@artem-system:~</span>
-                  </div>
-                  <div className="text-[--green-dim] text-xs hidden md:block">ArtemOS v2.0</div>
-                </div>
+                  </motion.div>
 
-                {/* Terminal content */}
-                <div
-                  ref={containerRef}
-                  className="h-[35vh] md:h-[45vh] overflow-y-auto p-3 md:p-4 font-mono text-xs md:text-sm"
-                >
-                  {history.map((item, i) => (
-                    <div key={i} className="mb-3">
-                      {item.command && (
-                        <div className="flex items-center gap-1 md:gap-2 text-[--green-dim] flex-wrap">
-                          <span style={{ color: "#50fa7b" }} className="hidden md:inline">root@artem-system</span>
-                          <span style={{ color: "#50fa7b" }} className="md:hidden">root</span>
-                          <span>:</span>
-                          <span className="text-blue-400">~</span>
-                          <span>#</span>
-                          <span style={{ color: "#50fa7b" }}>{item.command}</span>
-                        </div>
-                      )}
-                      <pre
-                        className={`whitespace-pre-wrap mt-1 ${item.isError ? "text-red-400" : ""}`}
-                        style={{ color: item.isError ? undefined : "#50fa7b" }}
-                      >
-                        {item.isTyping && typeof item.output === "string" ? (
-                          <TypingOutput
-                            text={item.output}
-                            speed={3}
-                            onUpdate={scrollToBottom}
-                            onComplete={() => {
-                              setHistory(prev => prev.map((h, idx) =>
-                                idx === i ? { ...h, isTyping: false } : h
-                              ));
-                            }}
-                          />
-                        ) : (
-                          item.output
-                        )}
-                      </pre>
+                  {/* Command prompt */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                    className="pt-4"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-[--green-dim]">$</span>
+                      <TypeWriter text="./explore_profile.sh" delay={1000} speed={50} />
                     </div>
-                  ))}
-
-                  {/* Special effects */}
-                  {specialEffect === "hack" && (
-                    <div className="mb-3">
-                      <HackSequence onComplete={() => setSpecialEffect(null)} />
-                    </div>
-                  )}
-                  {specialEffect === "matrix" && (
-                    <div className="mb-3">
-                      <MatrixBurst onComplete={() => {
-                        setSpecialEffect(null);
-                        setHistory(prev => [...prev, { command: "", output: "Matrix mode deactivated. Reality restored." }]);
-                      }} />
-                    </div>
-                  )}
-
-                  {/* Input line */}
-                  <div className="flex items-center gap-1 md:gap-2 text-[--green-dim]">
-                    <span style={{ color: "#50fa7b" }} className="hidden md:inline">root@artem-system</span>
-                    <span style={{ color: "#50fa7b" }} className="md:hidden">root</span>
-                    <span>:</span>
-                    <span className="text-blue-400">~</span>
-                    <span>#</span>
-                    <div className="flex-1 flex items-center">
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        className="bg-transparent outline-none w-auto min-w-[1ch]"
-                        style={{ color: "#50fa7b", caretColor: "transparent", width: `${Math.max(input.length, 1)}ch` }}
-                        spellCheck={false}
-                        autoComplete="off"
-                        autoCapitalize="off"
-                      />
-                      <motion.span
-                        className="w-2 h-5 inline-block"
-                        style={{ backgroundColor: "#50fa7b" }}
-                        animate={{ opacity: [1, 0, 1] }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                      />
-                    </div>
-                  </div>
+                  </motion.div>
                 </div>
               </div>
 
-              {/* Hint */}
+              {/* Action buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2 }}
+                className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center items-center"
+              >
+                <a href="#contact" className="btn-cyber group text-sm md:text-base">
+                  <span className="btn-cyber-glitch" data-text="[ CONTACT ]">[ CONTACT ]</span>
+                </a>
+                <a href="#projects" className="btn-cyber group text-sm md:text-base">
+                  <span className="btn-cyber-glitch" data-text="[ PROJECTS ]">[ PROJECTS ]</span>
+                </a>
+                <button
+                  onClick={() => setTerminalOpen(true)}
+                  className="btn-cyber group text-sm md:text-base"
+                >
+                  <span className="btn-cyber-glitch" data-text="[ TERMINAL ]">[ TERMINAL ]</span>
+                </button>
+              </motion.div>
+
+              {/* Scroll indicator */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-center mt-6"
+                transition={{ delay: 1.5 }}
+                className="text-center pt-8"
               >
-                <div className="text-[--green-dim] text-sm mb-4">
-                  [ TYPE <span style={{ color: "#50fa7b" }}>'help'</span> FOR COMMANDS OR <span style={{ color: "#50fa7b" }}>SCROLL DOWN</span> TO EXPLORE ]
-                </div>
                 <motion.div
                   animate={{ y: [0, 10, 0] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                   className="text-[--green-dim]"
                 >
+                  <div className="text-sm mb-2">SCROLL TO EXPLORE</div>
                   <div className="text-2xl">▼</div>
                 </motion.div>
               </motion.div>
@@ -809,6 +596,13 @@ export default function Hero() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Terminal Modal */}
+      <AnimatePresence>
+        {terminalOpen && (
+          <TerminalModal isOpen={terminalOpen} onClose={() => setTerminalOpen(false)} />
+        )}
+      </AnimatePresence>
     </section>
   );
 }
