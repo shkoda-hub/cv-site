@@ -38,16 +38,19 @@ export default function About() {
 
     // Phase 1: Loading (slower)
     setPhase(1);
-    let progress = 0;
+    setLoadProgress(5); // Start with visible progress
+    let progress = 5;
     const loadInterval = setInterval(() => {
-      progress += Math.random() * 8 + 4;
+      progress += Math.random() * 6 + 3;
       if (progress >= 100) {
         progress = 100;
+        setLoadProgress(100);
         clearInterval(loadInterval);
         setTimeout(() => startGreeting(), 500);
+      } else {
+        setLoadProgress(progress);
       }
-      setLoadProgress(progress);
-    }, 120);
+    }, 100);
 
     // Phase 2: Greeting typewriter (slower)
     function startGreeting() {

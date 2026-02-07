@@ -32,9 +32,11 @@ function SkillBar({
   const [displayLevel, setDisplayLevel] = useState(0);
   const [barWidth, setBarWidth] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const hasAnimated = useRef(false);
 
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive || hasAnimated.current) return;
+    hasAnimated.current = true;
 
     // Animate percentage and bar (slower)
     let current = 0;
