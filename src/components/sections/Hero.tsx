@@ -414,12 +414,6 @@ export default function Hero() {
       <div className="absolute bottom-6 left-6 w-20 h-20 border-l-2 border-b-2 border-[--green] opacity-50" />
       <div className="absolute bottom-6 right-6 w-20 h-20 border-r-2 border-b-2 border-[--green] opacity-50" />
 
-      {/* Scanning line */}
-      <motion.div
-        className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#50fa7b] to-transparent opacity-50"
-        animate={{ top: ["0%", "100%", "0%"] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-      />
 
       <div className="max-w-4xl w-full">
         <AnimatePresence mode="wait">
