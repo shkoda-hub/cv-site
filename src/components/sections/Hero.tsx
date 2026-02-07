@@ -633,6 +633,42 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
+              {/* Mobile: Simple text name */}
+              <motion.div
+                className="md:hidden text-center mb-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                <h1 className="text-4xl font-bold glow" style={{ color: "#50fa7b" }}>ARTEM</h1>
+                <h1 className="text-4xl font-bold glow" style={{ color: "#50fa7b" }}>SHKONDA</h1>
+                <p className="text-[--green-dim] mt-2">BACKEND DEVELOPER</p>
+              </motion.div>
+
+              {/* Desktop: ASCII Art Name */}
+              <motion.pre
+                className="hidden md:block text-center mb-6 glow text-xs lg:text-sm overflow-x-auto"
+                style={{ color: "#50fa7b" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+{`
+ █████╗ ██████╗ ████████╗███████╗███╗   ███╗
+██╔══██╗██╔══██╗╚══██╔══╝██╔════╝████╗ ████║
+███████║██████╔╝   ██║   █████╗  ██╔████╔██║
+██╔══██║██╔══██╗   ██║   ██╔══╝  ██║╚██╔╝██║
+██║  ██║██║  ██║   ██║   ███████╗██║ ╚═╝ ██║
+╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝     ╚═╝
+        ███████╗██╗  ██╗██╗  ██╗ ██████╗ ███╗   ██╗██████╗  █████╗
+        ██╔════╝██║  ██║██║ ██╔╝██╔═══██╗████╗  ██║██╔══██╗██╔══██╗
+        ███████╗███████║█████╔╝ ██║   ██║██╔██╗ ██║██║  ██║███████║
+        ╚════██║██╔══██║██╔═██╗ ██║   ██║██║╚██╗██║██║  ██║██╔══██║
+        ███████║██║  ██║██║  ██╗╚██████╔╝██║ ╚████║██████╔╝██║  ██║
+        ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═╝  ╚═╝
+`}
+              </motion.pre>
+
               {/* Terminal window */}
               <div
                 className="border-2 border-[--green] bg-black bg-opacity-90 relative overflow-hidden"
@@ -662,13 +698,14 @@ export default function Hero() {
                 {/* Terminal content */}
                 <div
                   ref={containerRef}
-                  className="h-[50vh] md:h-[55vh] overflow-y-auto p-4 font-mono text-sm"
+                  className="h-[35vh] md:h-[45vh] overflow-y-auto p-3 md:p-4 font-mono text-xs md:text-sm"
                 >
                   {history.map((item, i) => (
                     <div key={i} className="mb-3">
                       {item.command && (
-                        <div className="flex items-center gap-2 text-[--green-dim]">
-                          <span style={{ color: "#50fa7b" }}>root@artem-system</span>
+                        <div className="flex items-center gap-1 md:gap-2 text-[--green-dim] flex-wrap">
+                          <span style={{ color: "#50fa7b" }} className="hidden md:inline">root@artem-system</span>
+                          <span style={{ color: "#50fa7b" }} className="md:hidden">root</span>
                           <span>:</span>
                           <span className="text-blue-400">~</span>
                           <span>#</span>
@@ -712,8 +749,9 @@ export default function Hero() {
                   )}
 
                   {/* Input line */}
-                  <div className="flex items-center gap-2 text-[--green-dim]">
-                    <span style={{ color: "#50fa7b" }}>root@artem-system</span>
+                  <div className="flex items-center gap-1 md:gap-2 text-[--green-dim]">
+                    <span style={{ color: "#50fa7b" }} className="hidden md:inline">root@artem-system</span>
+                    <span style={{ color: "#50fa7b" }} className="md:hidden">root</span>
                     <span>:</span>
                     <span className="text-blue-400">~</span>
                     <span>#</span>

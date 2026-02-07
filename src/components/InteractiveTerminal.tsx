@@ -260,16 +260,16 @@ export default function InteractiveTerminal() {
 
   return (
     <>
-      {/* Toggle button - hidden on mobile */}
-      <motion.button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 w-12 h-12 md:w-14 md:h-14 bg-black border-2 border-[--green] hidden md:flex items-center justify-center hover:bg-[--green] hover:text-black transition-all group"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        title="Open Terminal (` or Ctrl+K)"
-      >
-        <span className="text-xl md:text-2xl group-hover:scale-110 transition-transform">{">"}_</span>
-      </motion.button>
+      {/*/!* Toggle button - hidden on mobile *!/*/}
+      {/*<motion.button*/}
+      {/*  onClick={() => setIsOpen(true)}*/}
+      {/*  className="fixed bottom-6 right-6 z-50 w-12 h-12 md:w-14 md:h-14 bg-black border-2 border-[--green] hidden md:flex items-center justify-center hover:bg-[--green] hover:text-black transition-all group"*/}
+      {/*  whileHover={{ scale: 1.1 }}*/}
+      {/*  whileTap={{ scale: 0.95 }}*/}
+      {/*  title="Open Terminal (` or Ctrl+K)"*/}
+      {/*>*/}
+      {/*  <span className="text-xl md:text-2xl group-hover:scale-110 transition-transform">{">"}_</span>*/}
+      {/*</motion.button>*/}
 
       {/* Terminal overlay */}
       <AnimatePresence>
