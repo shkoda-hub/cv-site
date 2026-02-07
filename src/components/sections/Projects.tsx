@@ -59,21 +59,21 @@ function ProjectCard({
     setTimeout(() => {
       setPhase(2);
       setTechIndex(0);
-    }, 500);
+    }, 800);
   }, [isActive, phase]);
 
-  // Reveal tech stack one by one
+  // Reveal tech stack one by one (slower)
   useEffect(() => {
     if (phase !== 2 || techIndex < 0) return;
 
     if (techIndex >= project.tech.length) {
-      setTimeout(onComplete, 200);
+      setTimeout(onComplete, 400);
       return;
     }
 
     const timer = setTimeout(() => {
       setTechIndex(techIndex + 1);
-    }, 100);
+    }, 200);
 
     return () => clearTimeout(timer);
   }, [phase, techIndex, project.tech.length, onComplete]);
@@ -206,30 +206,30 @@ export default function Projects() {
     }
   }, [isInView, phase]);
 
-  // Connecting phase
+  // Connecting phase (slower)
   useEffect(() => {
     if (phase !== "connecting") return;
-    setTimeout(() => setPhase("querying"), 500);
+    setTimeout(() => setPhase("querying"), 800);
   }, [phase]);
 
-  // Querying phase
+  // Querying phase (slower)
   useEffect(() => {
     if (phase !== "querying") return;
 
     let progress = 0;
     const interval = setInterval(() => {
-      progress += Math.random() * 30 + 15;
+      progress += Math.random() * 10 + 5;
       if (progress >= 100) {
         setQueryProgress(100);
         clearInterval(interval);
         setTimeout(() => {
           setPhase("fetching");
           setCurrentIndex(0);
-        }, 200);
+        }, 500);
       } else {
         setQueryProgress(progress);
       }
-    }, 60);
+    }, 100);
 
     return () => clearInterval(interval);
   }, [phase]);
@@ -239,7 +239,7 @@ export default function Projects() {
     if (currentIndex < projects.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      setTimeout(() => setPhase("complete"), 300);
+      setTimeout(() => setPhase("complete"), 600);
     }
   };
 

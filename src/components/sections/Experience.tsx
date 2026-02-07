@@ -48,25 +48,25 @@ function TimelineNode({
     if (!isActive || phase > 0) return;
     setPhase(1);
 
-    // Scanning phase
+    // Scanning phase (slower)
     setTimeout(() => {
       setPhase(2);
       setAchievementIndex(0);
-    }, 600);
+    }, 1000);
   }, [isActive, phase]);
 
-  // Reveal achievements one by one
+  // Reveal achievements one by one (slower)
   useEffect(() => {
     if (phase !== 2 || achievementIndex < 0) return;
 
     if (achievementIndex >= exp.achievements.length) {
-      setTimeout(onComplete, 200);
+      setTimeout(onComplete, 500);
       return;
     }
 
     const timer = setTimeout(() => {
       setAchievementIndex(achievementIndex + 1);
-    }, 150);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [phase, achievementIndex, exp.achievements.length, onComplete]);
@@ -216,18 +216,18 @@ export default function Experience() {
 
     let progress = 0;
     const interval = setInterval(() => {
-      progress += Math.random() * 25 + 10;
+      progress += Math.random() * 10 + 4;
       if (progress >= 100) {
         setLoadProgress(100);
         clearInterval(interval);
         setTimeout(() => {
           setPhase("reading");
           setCurrentIndex(0);
-        }, 200);
+        }, 500);
       } else {
         setLoadProgress(progress);
       }
-    }, 80);
+    }, 120);
 
     return () => clearInterval(interval);
   }, [phase]);
@@ -237,7 +237,7 @@ export default function Experience() {
     if (currentIndex < experience.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      setTimeout(() => setPhase("complete"), 300);
+      setTimeout(() => setPhase("complete"), 600);
     }
   };
 

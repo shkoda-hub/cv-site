@@ -36,10 +36,10 @@ function SkillBar({
   useEffect(() => {
     if (!isActive) return;
 
-    // Animate percentage and bar
+    // Animate percentage and bar (slower)
     let current = 0;
-    const duration = 800; // ms
-    const steps = 30;
+    const duration = 1200; // ms
+    const steps = 40;
     const increment = level / steps;
     const stepTime = duration / steps;
 
@@ -50,7 +50,7 @@ function SkillBar({
         setBarWidth(level);
         setIsComplete(true);
         clearInterval(interval);
-        setTimeout(onComplete, 200);
+        setTimeout(onComplete, 400);
       } else {
         setDisplayLevel(Math.floor(current));
         setBarWidth(current);
@@ -171,7 +171,7 @@ export default function Skills() {
 
     let progress = 0;
     const interval = setInterval(() => {
-      progress += Math.random() * 15 + 5;
+      progress += Math.random() * 8 + 3;
       if (progress >= 100) {
         setInitProgress(100);
         clearInterval(interval);
@@ -179,11 +179,11 @@ export default function Skills() {
           setPhase("scanning");
           setHeaderStatus("SCANNING");
           setCurrentSkillIndex(0);
-        }, 300);
+        }, 600);
       } else {
         setInitProgress(progress);
       }
-    }, 100);
+    }, 150);
 
     return () => clearInterval(interval);
   }, [phase]);

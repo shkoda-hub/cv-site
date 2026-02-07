@@ -51,11 +51,11 @@ function ChannelCard({
     if (!isActive || phase > 0) return;
     setPhase(1);
 
-    // Pinging animation
+    // Pinging animation (slower)
     setTimeout(() => {
       setPhase(2);
-      setTimeout(onComplete, 200);
-    }, 600);
+      setTimeout(onComplete, 400);
+    }, 900);
   }, [isActive, phase, onComplete]);
 
   return (
@@ -169,24 +169,24 @@ export default function Contact() {
     }
   }, [isInView, phase]);
 
-  // Init phase
+  // Init phase (slower)
   useEffect(() => {
     if (phase !== "init") return;
 
     let progress = 0;
     const interval = setInterval(() => {
-      progress += Math.random() * 25 + 15;
+      progress += Math.random() * 10 + 5;
       if (progress >= 100) {
         setInitProgress(100);
         clearInterval(interval);
         setTimeout(() => {
           setPhase("pinging");
           setCurrentIndex(0);
-        }, 200);
+        }, 500);
       } else {
         setInitProgress(progress);
       }
-    }, 60);
+    }, 100);
 
     return () => clearInterval(interval);
   }, [phase]);
@@ -196,7 +196,7 @@ export default function Contact() {
     if (currentIndex < socialLinks.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      setTimeout(() => setPhase("complete"), 300);
+      setTimeout(() => setPhase("complete"), 600);
     }
   };
 
